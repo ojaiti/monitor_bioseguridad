@@ -1,5 +1,6 @@
 .main__body {
-  margin-top: 100px;
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
 .main__body > h1 {
   text-align: center;
@@ -17,7 +18,7 @@
   color: #1976d2;
 }
 .main__body > form {
-  margin-top: 100px;
+  margin-top: 40px;
   display: flex;
   justify-content: space-evenly;
   flex-wrap: wrap;

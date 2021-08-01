@@ -105,7 +105,7 @@ export const LoginScreen = () => {
             <div className="card__form">
                 <form onSubmit={handleSubmit} method="post">
                   <div className="d-flex justify-content-around align-items-center flex-column mb-3">
-                    <img className="mb-2" width="100" src="./assets/logos/logo_ojai.png" />
+                    <img className="mb-2" width="100" src="./assets/logos/logo_ojai.png" alt="Logo Ojai"/>
                     <h5 className="m-0"><b>MONITOR</b> BIOSEGURIDAD</h5>
                     <p className="elaborado">Programa Interno para uso de la empresa</p>
                   </div>

@@ -6,101 +6,94 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useHistory } from "react-router-dom";
 import { AuthContext } from '../../auth/AuthContext';
+import CuentaRegresiva from './CuentaRegresiva';
 
 const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
 
     const [lastFarmVisited, setLastFarmVisited] = useState({})
+    const [finCuarentena, setFinCuarentena] = useState(null)
     
-    //Se obtiene los datos de la ultima granja visitada por usuario
-    const { user:{ name, user_detail }, dispatch } = useContext(AuthContext);
+    //Se obtiene los datos del usuario actual
+    const { user:{ name, user_detail }} = useContext(AuthContext);
 
 
+    useEffect(() => {
+        console.log(granjas)
+        const fetchData = async () => {
+        const lastFarm = await fetch(`http://127.0.0.1:8000/last_farm_visited_by_user/${user_detail.id}`, {
+            /* Aqui se obtiene la ultima granja visitada por el usuario */
+            method: "GET"
+        })
+        const lastFarmResponse = await lastFarm.json()
+        const lastFarmName = await fetch(`http://127.0.0.1:8000/farms/${lastFarmResponse.farm_frm_visited_id}`, {
+            /* Aqui se obtiene el nombre de la ultima granja visitada por el usuario a la info del usuario */
+            method: "GET"
+        })
+        const lastFarmResponseName = await lastFarmName.json()
+        
 
- useEffect(() => {
-    const fetchData = async () => {
-    const lastFarm = await fetch(`http://127.0.0.1:8000/last_farm_visited_by_user/${user_detail.id}`, {
-        /* Aqui se obtiene la request a la info del usuario */
-        method: "GET"
-      })
-    const lastFarmResponse = await lastFarm.json()
-      console.log(lastFarmResponse)
-    const lastFarmName = await fetch(`http://127.0.0.1:8000/farms/${lastFarmResponse.farm_frm_visited_id}`, {
-        /* Aqui se obtiene la request a la info del usuario */
-        method: "GET"
-      })
-      const lastFarmResponseName = await lastFarmName.json()
-      
-
-      const data= {
-        'visita_fecha':lastFarmResponse.frm_visited_date.slice(0, 10),
-        'nombre_granja':lastFarmResponseName.frm_name,
-        'id_granja' : lastFarmResponse.farm_frm_visited_id
-      }
-
-      setLastFarmVisited(data)
-    }
-    fetchData()
- }, [user_detail.id])
+        const data= {
+            'visita_fecha':lastFarmResponse.frm_visited_date.slice(0, 10),
+            'visita_fecha_completa':lastFarmResponse.frm_visited_date,
+            'nombre_granja':lastFarmResponseName.frm_name,
+            'id_granja' : lastFarmResponse.farm_frm_visited_id
+        }
+        
+        setLastFarmVisited(data)
+        setCiudad(lastFarmResponse.farm_frm_visited_id);
+        }
+        fetchData()
+    }, [user_detail.id])
 
 
-
-
- console.log('lastFarmVisited',lastFarmVisited)
- 
     const [ciudad, setCiudad] = React.useState('1');
     const [ciudad2, setCiudad2] = React.useState('2');
     const [loading, setLoading] = React.useState(false)
     /* Tiempo de carga para el loader */
     const timeLoader = 1000
 
+    /* Function para cambiar a la seccion de BIOSEGURIDAD */
     let history = useHistory();
     const handleClick = () => {
         history.push("/" + nombreTabla);
     }
-
+    /* Funcion para verificar si puedes reigistrar una visita */
     const handleSubmit = (e) => {
-        e.preventDefault()
-        console.log('Hello')
-        setCiudad(ciudad2)
+        console.log(finCuarentena)
+        e.preventDefault()  
     }
+    /* Esta funcion dispara el Loader */
     const handleLoading = () => {
         setLoading(true)
         setTimeout(() => {
             setLoading(false)
         }, timeLoader)
     }
-    const handleChange = (event) => {
+    /* Esta funcion no realiza ninguna acccion pero is indispensable */
+    /* const handleChange = (event) => {
         setCiudad(event.target.value);
         handleLoading()
-    };
+    }; */
     const handleChange2 = (event) => {
         setCiudad2(event.target.value);
-
-        console.log('ciudad', ciudad)
-        console.log('ciudad2', ciudad2)
         handleLoading()
     };
 
     return (
         <div className="main__body">
+            {/* Tiempo Restante para tu proxima visita a granja */}
+            <CuentaRegresiva
+            fecha={lastFarmVisited.visita_fecha_completa}
+            noches = {granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1]}
+            setFinCuarentena={setFinCuarentena} 
+            />
+            
             <h2 className="text-uppercase">{titulo}</h2>
             
             
             <h1>Nota: Revisa primero las restricciones existentes de <button className="btn btn-warning" type="button" onClick={handleClick}>BIOSEGURIDAD</button></h1>
-            
-            <h4>Origen</h4>
-            <h1>{name}</h1>
-            <h1>{lastFarmVisited.nombre_granja}</h1>
-            <h1>{lastFarmVisited.visita_fecha}</h1>
-            <div className="mb-30">
-                        <span>Estatus (Origen) {' '}</span>
-                        <span className={granjas[parseInt(ciudad) - 1].status === 'Libre' ? 'libre' : 'noLibre'}>
-                            {
-                                granjas[parseInt(ciudad) - 1].status
-                            }
 
-                        </span>
-                    </div>
+            <h1>{name}</h1>
             <form onSubmit={(e)=>{handleSubmit(e)}} noValidate autoComplete="off">
                 <div className="content-form" >
 
@@ -114,7 +107,7 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
                             select
                             label="Select"
                             value={ciudad}
-                            onChange={handleChange}
+                            
                             /* Show Date of your last visit */
                             helperText={lastFarmVisited && 'Ultima Granja Visitada: ' +lastFarmVisited.nombre_granja +' '+lastFarmVisited.visita_fecha}
 
@@ -130,10 +123,7 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
                     <div className="mb-30">
                         <span>Estatus (Origen) {' '}</span>
                         <span className={granjas[parseInt(ciudad) - 1].status === 'Libre' ? 'libre' : 'noLibre'}>
-                            {
-                                granjas[parseInt(ciudad) - 1].status
-                            }
-
+                            {granjas[parseInt(ciudad) - 1].status}
                         </span>
                     </div>
                     <div className="mb-10">
@@ -160,10 +150,7 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
                     <div className="mb-10">
                         <span>Estatus (Destino) {' '}</span>
                         <span className={granjas[parseInt(ciudad2) - 1].status === 'Libre' ? 'libre' : 'noLibre'}>
-                            {
-                                granjas[parseInt(ciudad2) - 1].status
-                            }
-
+                            {granjas[parseInt(ciudad2) - 1].status}
                         </span>
                     </div>
                     
@@ -180,7 +167,7 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
                         }
                         <br /><br /><br /><br /><br />
                         {
-                            loading ? '' : granjas[parseInt(ciudad) - 1].destinosConAutorizacion.includes(ciudad2) ? granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1] : ''
+                            loading ? '' : granjas[parseInt(ciudad) - 1].destinosConAutorizacion.includes(ciudad2) ? granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1] : 'aaaaaaaaaaa'
                         }
 
                         {
@@ -195,7 +182,6 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
                                 timeout={timeLoader} //3 secs
                             />
                         }
-                        <h2>No se puede ir</h2>
                     </div>
 
                 </div>
