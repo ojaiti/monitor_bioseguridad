@@ -1,20 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
 const CuentaRegresiva = ({fecha, noches, setFinCuarentena}) => {
-    const [mostrarRestante, setShowRestante] = useState({})
-    const [playable, setPlayable] = useState(true);
-    const [restante, setRestante] = useState(0);
-    const d = new Date(fecha);
+    const [mostrarRestante, setShowRestante] = useState({'days':0,'hours':0,'minutes':0,'seconds':0})
+    const [distanceFinal, setDistanceFinal] = useState(0)
 
+    const d = new Date(fecha);
     /* Funcion que le suma 4 dias a la fecha */
-    var newFecha = sumarDias(d, 6);
+    var newFecha = sumarDias(d, noches);
     function sumarDias(fecha, dias) {
         var f = fecha.setDate(fecha.getDate() + dias);
         return f;
     }
-
-
     var end = new Date(newFecha);
+    
   
     var _second = 1000;
     var _minute = _second * 60;
@@ -24,41 +22,53 @@ const CuentaRegresiva = ({fecha, noches, setFinCuarentena}) => {
     const tiempoRestante = useCallback(() => {
       var now = new Date();
       var distance = end - now;
-      setRestante(distance);
-      setFinCuarentena(mostrarRestante)
-      
       var days = Math.floor(distance / _day);
       var hours = Math.floor((distance % _day) / _hour);
       var minutes = Math.floor((distance % _hour) / _minute);
       var seconds = Math.floor((distance % _minute) / _second);
 
-      setShowRestante({
-        "days":days,
-        "hours":hours,
-        "minutes":minutes,
-        "seconds":seconds
-      })
+      setDistanceFinal(distance)
+
+      if(distance > 0){
+        setShowRestante({
+                days,
+                hours,
+                minutes,
+                seconds,
+              })
+      }else{
+        setShowRestante({
+          'days':0,
+          'hours':0,
+          'minutes':0,
+          'seconds':0,
+        })
+      }
+
+      
+
+      
   
       
-    }, [restante]);
+    },[noches]);
   
     useEffect(() => {
-      if (playable === true) {
+      if(noches >= 0){
+        if(distanceFinal > 0){
+          console.log('distanceFinal', distanceFinal)
+        }
+        setFinCuarentena(mostrarRestante)
         const intervalId = setInterval(tiempoRestante, 1000);
         return () => clearInterval(intervalId);
+
       }
-    }, [tiempoRestante]);
+    }, [noches, , mostrarRestante]);
 
-
-    /* const autoPlay = () => {
-        var flag = !playable;
-        setPlayable(flag);
-      }; */
+    
     return (
         <div className="main__body">
              <h1>Tiempo restante </h1>
-             <h1>Dias: {mostrarRestante.days ? mostrarRestante.days : 0}, Horas: {mostrarRestante.hours ? mostrarRestante.hours : 0}, Minutos: {mostrarRestante.minutes ? mostrarRestante.minutes : 0}, Segundos: {mostrarRestante.seconds ? mostrarRestante.seconds : 0}</h1>
-             {/* <button onClick={autoPlay}>Play</button> */}
+             <h1>Dias: {mostrarRestante.days}, Horas: {mostrarRestante.hours}, Minutos: {mostrarRestante.minutes}, Segundos: {mostrarRestante.seconds}</h1>
         </div>
     )
 }

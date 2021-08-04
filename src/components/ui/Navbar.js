@@ -5,9 +5,8 @@ import { types } from '../../types/types';
 import '../../css/header.css'
 export const Navbar = () => {
 
-    const { user:{ name, user_detail }, dispatch } = useContext(AuthContext);
+    const { user:{ name }, dispatch } = useContext(AuthContext);
     const history = useHistory();
-    console.log(user_detail)
     const handleLogout = () => {
 
         history.replace('/login');
@@ -17,7 +16,7 @@ export const Navbar = () => {
             payload:{
                 name:'',
                 token:'',
-                user_detail: ''
+                userDetail: ''
               }
         });
     }

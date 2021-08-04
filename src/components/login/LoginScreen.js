@@ -53,7 +53,7 @@ export const LoginScreen = () => {
     if(tokenResponse.hasOwnProperty("access_token")){
      
       //Get User details
-      const getUserMe = await fetch("http://127.0.0.1:8000/users/me/", {
+     fetch("http://127.0.0.1:8000/users/me/", {
             
         /* Aqui se obtiene la request a la info del usuario */
         headers: {
@@ -62,17 +62,49 @@ export const LoginScreen = () => {
         },
         method: "GET"
       })
-      const userResponse = await getUserMe.json()
-
-      //Username and user details
-      dispatch({
-        type: types.login,
-        payload:{
-          name:username,
-          token:tokenResponse.access_token,
-          user_detail: userResponse
-        }
+      .then(function(response){
+        return response.json();
       })
+      .then(function(json) {
+        fetch("http://127.0.0.1:8000/last_farm_visited_by_user/"+json.id)
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(json2){
+          fetch("http://127.0.0.1:8000/farms/"+json2.farm_frm_visited_id)
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(json3){
+            console.log('json 1.1.1.1.',json)
+            console.log('json 22.2.2.2',json2)
+            console.log('json 3.3,.3.3.3',json3)
+            const user_detail = {
+              "id":json.id,
+              "username": json.username,
+              "frm_name" : json3.frm_name,
+              "frm_visited_date": json2.frm_visited_date,
+              "farm_frm_visited_id": json2.farm_frm_visited_id
+            }
+
+            dispatch({
+              type: types.login,
+              payload:{
+                name:username,
+                token:tokenResponse.access_token,
+                user_detail: user_detail
+                }
+              })
+            })
+
+
+        })
+      });
+
+      /* const userResponse = await getUserMe.json() */
+
+      
+      
     }else{
       
       setErrorMessage({

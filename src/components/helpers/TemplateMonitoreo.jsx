@@ -9,49 +9,28 @@ import { AuthContext } from '../../auth/AuthContext';
 import CuentaRegresiva from './CuentaRegresiva';
 
 const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
-
-    const [lastFarmVisited, setLastFarmVisited] = useState({})
-    const [finCuarentena, setFinCuarentena] = useState(null)
-    
-    //Se obtiene los datos del usuario actual
-    const { user:{ name, user_detail }} = useContext(AuthContext);
-
-
-    useEffect(() => {
-        console.log(granjas)
-        const fetchData = async () => {
-        const lastFarm = await fetch(`http://127.0.0.1:8000/last_farm_visited_by_user/${user_detail.id}`, {
-            /* Aqui se obtiene la ultima granja visitada por el usuario */
-            method: "GET"
-        })
-        const lastFarmResponse = await lastFarm.json()
-        const lastFarmName = await fetch(`http://127.0.0.1:8000/farms/${lastFarmResponse.farm_frm_visited_id}`, {
-            /* Aqui se obtiene el nombre de la ultima granja visitada por el usuario a la info del usuario */
-            method: "GET"
-        })
-        const lastFarmResponseName = await lastFarmName.json()
-        
-
-        const data= {
-            'visita_fecha':lastFarmResponse.frm_visited_date.slice(0, 10),
-            'visita_fecha_completa':lastFarmResponse.frm_visited_date,
-            'nombre_granja':lastFarmResponseName.frm_name,
-            'id_granja' : lastFarmResponse.farm_frm_visited_id
-        }
-        
-        setLastFarmVisited(data)
-        setCiudad(lastFarmResponse.farm_frm_visited_id);
-        }
-        fetchData()
-    }, [user_detail.id])
-
-
     const [ciudad, setCiudad] = React.useState('1');
     const [ciudad2, setCiudad2] = React.useState('2');
     const [loading, setLoading] = React.useState(false)
     /* Tiempo de carga para el loader */
     const timeLoader = 1000
+    const [finCuarentena, setFinCuarentena] = useState(null)
+    
+    //Se obtiene los datos del usuario actual
+    const { user:{ name, user_detail }} = useContext(AuthContext);
 
+    /* Esta funcion dispara el Loader */
+    const handleLoading = () => {
+        setLoading(true)
+        setTimeout(() => {
+            setLoading(false)
+        }, timeLoader)
+    }
+    
+    useEffect(() => {
+        setCiudad(user_detail.farm_frm_visited_id)
+        handleLoading()
+    }, [])
     /* Function para cambiar a la seccion de BIOSEGURIDAD */
     let history = useHistory();
     const handleClick = () => {
@@ -62,13 +41,7 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
         console.log(finCuarentena)
         e.preventDefault()  
     }
-    /* Esta funcion dispara el Loader */
-    const handleLoading = () => {
-        setLoading(true)
-        setTimeout(() => {
-            setLoading(false)
-        }, timeLoader)
-    }
+    
     /* Esta funcion no realiza ninguna acccion pero is indispensable */
     /* const handleChange = (event) => {
         setCiudad(event.target.value);
@@ -83,8 +56,8 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
         <div className="main__body">
             {/* Tiempo Restante para tu proxima visita a granja */}
             <CuentaRegresiva
-            fecha={lastFarmVisited.visita_fecha_completa}
-            noches = {granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1]}
+            fecha={user_detail.frm_visited_date}
+            noches = {parseInt(granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1])}
             setFinCuarentena={setFinCuarentena} 
             />
             
@@ -109,7 +82,7 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
                             value={ciudad}
                             
                             /* Show Date of your last visit */
-                            helperText={lastFarmVisited && 'Ultima Granja Visitada: ' +lastFarmVisited.nombre_granja +' '+lastFarmVisited.visita_fecha}
+                            helperText={'Ultima Granja Visitada: ' +user_detail.frm_name +' '+user_detail.frm_visited_date}
 
                         >
                             {granjas.map((option) => (
@@ -186,7 +159,18 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
 
                 </div>
                 <div className="col-lg-12 d-flex justify-content-center">
-                    <button className="btn btn-primary">Siguiente</button>
+                   {
+                    loading ? '' : <button className="btn btn-primary">Siguiente</button>
+                    }
+                    {
+                            loading && <Loader
+                                type="Oval"
+                                color="#00BFFF"
+                                height={30}
+                                width={30}
+                                timeout={timeLoader} //3 secs
+                            />
+                        }
                 </div>
             </form>
 
