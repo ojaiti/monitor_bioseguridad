@@ -12,6 +12,8 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
     const [ciudad, setCiudad] = React.useState('1');
     const [ciudad2, setCiudad2] = React.useState('2');
     const [loading, setLoading] = React.useState(false)
+    const [cumpleCuarentena, setCumpleCuarentena] = useState(false)
+    const [hizoClickSiguiente, setHizoClickSiguiente] = useState(false)
     /* Tiempo de carga para el loader */
     const timeLoader = 1000
     const [finCuarentena, setFinCuarentena] = useState(null)
@@ -30,6 +32,7 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
     useEffect(() => {
         setCiudad(user_detail.farm_frm_visited_id)
         handleLoading()
+        console.log('finCuarentena', finCuarentena)
     }, [])
     /* Function para cambiar a la seccion de BIOSEGURIDAD */
     let history = useHistory();
@@ -50,8 +53,18 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
     const handleChange2 = (event) => {
         setCiudad2(event.target.value);
         handleLoading()
+        setHizoClickSiguiente(false)
     };
 
+    const verificarCuarentena = (event) => {
+        setHizoClickSiguiente(true)
+        if(finCuarentena.days === 0 && finCuarentena.hours === 0 && finCuarentena.minutes === 0 && finCuarentena.seconds === 0){
+            setCumpleCuarentena(true)
+        }
+        else{
+            setCumpleCuarentena(false)
+        }
+    }
     return (
         <div className="main__body">
             {/* Tiempo Restante para tu proxima visita a granja */}
@@ -155,12 +168,15 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
                                 timeout={timeLoader} //3 secs
                             />
                         }
+                        {hizoClickSiguiente ? cumpleCuarentena ? <h5>SI CUMPLE CON CUARENTENA</h5> : <h5>NO CUMPLE CON CUARENTENA</h5> : ''}
+                        
                     </div>
 
                 </div>
                 <div className="col-lg-12 d-flex justify-content-center">
+                    <div className="col-lg-2">
                    {
-                    loading ? '' : <button className="btn btn-primary">Siguiente</button>
+                    loading ? '' : <button onClick={verificarCuarentena} className="btn btn-primary">Siguiente</button>
                     }
                     {
                             loading && <Loader
@@ -171,6 +187,10 @@ const TemplateMonitoreo = ({ granjas, titulo, nombreTabla }) => {
                                 timeout={timeLoader} //3 secs
                             />
                         }
+                    </div>
+                    <div className="col-lg-2">
+                    {hizoClickSiguiente ? cumpleCuarentena ? <button className="btn btn-primary">Guardar</button> : '' : ''}
+                    </div>
                 </div>
             </form>
 
