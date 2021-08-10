@@ -164,3 +164,14 @@
   contain: content;
   z-index: -1;
 }
+
+
+/* Semaforo cuarentena */
+.success, .danger{
+  background: green;
+  padding:10px;
+  color: #fff;
+}
+.danger{
+  background: red
+}

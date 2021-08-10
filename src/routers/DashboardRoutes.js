@@ -16,6 +16,7 @@ import MonitorCordoba from '../components/cordoba/MonitorCordoba';
 import TablaCordoba from '../components/cordoba/TablaCordoba';
 import Aciones_Preventivas from '../components/acciones_preventivas/Aciones_Preventivas';
 import Todas_regiones from '../components/todas_regiones/Todas_regiones';
+import Last_farms_visited from '../components/last_farms_visited_by_user/Last_farms_visited';
 
 export const DashboardRoutes = () => {
 
@@ -36,6 +37,7 @@ export const DashboardRoutes = () => {
                     <Route exact path="/tablacordoba" component={ TablaCordoba } />
                     <Route exact path="/todas_regiones" component={ Todas_regiones } />
                     <Route exact path="/acciones_preventivas" component={ Aciones_Preventivas } />
+                    <Route exact path="/visitas" component={ Last_farms_visited } />
                     {/* <Route exact path="/marvel" component={ MarvelScreen } />
                     <Route exact path="/hero/:heroeId" component={ HeroScreen } />
                     <Route exact path="/dc" component={ DcScreen } />

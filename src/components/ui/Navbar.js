@@ -3,8 +3,10 @@ import { Link, NavLink, useHistory } from 'react-router-dom';
 import { AuthContext } from '../../auth/AuthContext';
 import { types } from '../../types/types';
 import '../../css/header.css'
-export const Navbar = () => {
 
+
+export const Navbar = () => {
+  
     const { user:{ name }, dispatch } = useContext(AuthContext);
     const history = useHistory();
     const handleLogout = () => {
@@ -24,6 +26,8 @@ export const Navbar = () => {
     
     return (
         <nav className="navbar navbar-expand-sm navbar-dark">
+
+
             
             <Link 
                 className="navbar-brand" 
@@ -35,6 +39,8 @@ export const Navbar = () => {
             <div className="navbar-collapse col-lg-7">
                 <div className="navbar-nav">
 
+                        
+    
                     <NavLink 
                         activeClassName="active"
                         className="nav-item nav-link" 
@@ -43,7 +49,7 @@ export const Navbar = () => {
                     >
                         Noroeste
                     </NavLink>
-                    <NavLink 
+          <NavLink 
                         activeClassName="active"
                         className="nav-item nav-link" 
                         exact
@@ -51,7 +57,7 @@ export const Navbar = () => {
                     >
                         Veracruz
                     </NavLink>
-                    <NavLink 
+          <NavLink 
                         activeClassName="active"
                         className="nav-item nav-link" 
                         exact
@@ -59,7 +65,7 @@ export const Navbar = () => {
                     >
                         Tehuacan
                     </NavLink>
-                    <NavLink 
+              <NavLink 
                         activeClassName="active"
                         className="nav-item nav-link" 
                         exact
@@ -67,6 +73,8 @@ export const Navbar = () => {
                     >
                         Cordoba
                     </NavLink>
+                    {/* ------------------------------------------------ */}
+                    
                     <NavLink 
                         activeClassName="active"
                         className="nav-item nav-link" 
@@ -82,6 +90,14 @@ export const Navbar = () => {
                         to="/acciones_preventivas"
                     >
                         Acciones Preventivas
+                    </NavLink>
+                    <NavLink 
+                        activeClassName="active"
+                        className="nav-item nav-link" 
+                        exact
+                        to="/visitas"
+                    >
+                        Mis visitas
                     </NavLink>
                         
                     {/* <NavLink 

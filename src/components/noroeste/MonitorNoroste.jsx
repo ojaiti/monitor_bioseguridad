@@ -6,7 +6,7 @@ import TemplateMonitoreo from '../helpers/TemplateMonitoreo'
 const MonitorNoroeste = () => {
     return (
         <div>
-            <TemplateMonitoreo granjas={noroeste} titulo={'Noroeste'} nombreTabla={'tablanoroeste'} />
+            <TemplateMonitoreo region={1} granjas={noroeste} titulo={'Noroeste'} nombreTabla={'tablanoroeste'} />
         </div>
     )
 }
