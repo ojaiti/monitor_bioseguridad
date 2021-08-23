@@ -22,6 +22,9 @@
   display: flex;
   justify-content: space-evenly;
   flex-wrap: wrap;
+  background-repeat: no-repeat;
+  background-position-x: center;
+  background-position-y: center;
 }
 
 .MuiFormControl-root {
@@ -35,14 +38,15 @@
   margin-bottom: 30px;
 }
 
-.libre {
+.libre, .noLibre  {
   background: #24bd2a;
   padding: 5px 10px;
+  color: #ffffff;
+  border-radius: 3px;
 }
-.noLibre {
-  background: #ffeb3b;
-  color: #615f41;
-  padding: 5px 10px;
+.noLibre{
+  background: #dd2121;
+
 }
 
 .show__restriccion {

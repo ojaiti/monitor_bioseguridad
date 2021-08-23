@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import "../../css/mainBody.css"
 import Loader from "react-loader-spinner";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
@@ -6,26 +6,40 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useHistory } from "react-router-dom";
 import { AuthContext } from '../../auth/AuthContext';
-import CuentaRegresiva from './CuentaRegresiva';
+import Regresiva from './Regresiva';
 
-const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
-    const [ciudad, setCiudad] = React.useState('1');
-    const [ciudad2, setCiudad2] = React.useState('2');
+
+const TemplateMonitoreo = ({farms, lastFarmVisited, granjas, titulo, nombreTabla }) => {
+    const { user:{ name, user_detail }} = useContext(AuthContext);
+    const [ciudad, setCiudad] = React.useState(lastFarmVisited.farm_id);
+    const [ciudad2, setCiudad2] = React.useState(farms[0].frm_id);
     const [loading, setLoading] = React.useState(false)
+    const [takeScreen, setTakeScreen] =  useState(false)
     const [cumpleCuarentena, setCumpleCuarentena] = useState(false)
     const [hizoClickSiguiente, setHizoClickSiguiente] = useState(false)
 
-    const [isLoading, setIsLoading] = useState(true)
+    console.log('farms', farms[ciudad].frm_restriction)
+
+    /* isVisitedRegistered */
+    const [isVisitedRegistered, setIsVisitedRegistered] = useState(false)
+    /* Click en guardar */
+    /* Use Ref */
+    var dateQuarantined = useRef({'days':0,'hours':0,'minutes':0,'seconds':0})
+
     /* Tiempo de carga para el loader */
     const timeLoader = 1000
-    const [finCuarentena, setFinCuarentena] = useState(null)
+    var cuarentena = useRef({'days':0,'hours':0,'minutes':0,'seconds':0})
     //Se obtiene los datos del usuario actual
-    const { user:{ name, user_detail }} = useContext(AuthContext);
-    
     const [last_farm, setLastFarm] = useState(user_detail)
 
-    const [farmsList, setFarmsList] = useState({})
 
+    /* Use Callback */
+    
+    const callback = useCallback((value) => {
+        console.log('value', value)
+        cuarentena.current = value
+        /* setFinCuarentena(value); */
+    }, []);
     /* Esta funcion dispara el Loader */
     const handleLoading = () => {
         setLoading(true)
@@ -34,37 +48,23 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
         }, timeLoader)
     }
 
-    const getFarms = (region) => {
-        fetch("http://127.0.0.1:8000/farms_by_region/"+region)
-        .then(function(response) {
-          return response.json();
-        })
-        .then(function(farm_list){
-            setFarmsList(farm_list)
-            console.log('lista_farms', farm_list);
-            setIsLoading(false)
-          })
-    }
-    useEffect(() => {
+   
+    
 
-        const farms_lsit = getFarms(region)
-
-
-        setCiudad(user_detail.farm_frm_visited_id)
-        handleLoading()
-    }, [user_detail, region])
+    /* Get all farms by region */
+    
     /* Function para cambiar a la seccion de BIOSEGURIDAD */
     let history = useHistory();
     const handleClick = () => {
         history.push("/" + nombreTabla);
     }
-    console.log('farmsListState', farmsList);
     /* Submit */
     const handleSubmit = (e) => {
 
         var url = 'http://127.0.0.1:8000/farm_visited';
         var data = {
             "frm_visited_date": new Date(),
+            "frm_visited_quarantine_nights":granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1],
             "farm_frm_visited_id":parseInt(ciudad2),
             "user_frm_visited_id": user_detail.id
         };
@@ -85,7 +85,6 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                 return response.json();
             })
             .then(function(res){
-                console.log('EEE',res)
 
                 /* farm_frm_visited_id: 3
                 frm_name: "SECCION 10"
@@ -100,19 +99,13 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                     username : res.User.username
                 }
                 setLastFarm(user_detail2)
+                setIsVisitedRegistered(true)
             })
-
 
         });
         e.preventDefault()  
     }
     
-    /* Esta funcion no realiza ninguna acccion pero is indispensable */
-    /* const handleChange = (event) => {
-        setCiudad(event.target.value);
-        handleLoading()
-    }; */
-    var noches = parseInt(granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1])
     const handleChange2 = (event) => {
         setCiudad2(event.target.value);
         handleLoading()
@@ -120,21 +113,35 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
     };
 /* Cumple o no Con Cuarentena */
     const verificarCuarentena = (event) => {
+        
         setHizoClickSiguiente(true)
-        if(finCuarentena.days <= 0 && finCuarentena.hours <= 0 && finCuarentena.minutes <= 0 && finCuarentena.seconds <= 0){
-            setCumpleCuarentena(true)
+        if(cuarentena.current.days > 0 || cuarentena.current.hours > 0 || cuarentena.current.minutes > 0 || cuarentena.current.seconds > 0){
+            setCumpleCuarentena(false)
+            console.log('No cumple cuarentena')
         }
         else{
-            setCumpleCuarentena(false)
+            setCumpleCuarentena(true)
+            console.log(' cumple cuarentena')
         }
     }
+    const verificarTakeScreen = () => {
+        hizoClickSiguiente ? setTakeScreen(true) : setTakeScreen(false)
+    }
+    
     return (
         <div className="main__body">
             {/* Tiempo Restante para tu proxima visita a granja */}
-            <CuentaRegresiva
+            {/* <CuentaRegresiva
             fecha={last_farm.frm_visited_date}
             noches = {noches == 0 ? -1 : noches}
             setFinCuarentena={setFinCuarentena} 
+            /> */}
+
+            <Regresiva 
+            fecha={last_farm.frm_visited_date}
+            forwardedRef={dateQuarantined}
+            parentCallback={callback}
+            isVisitedRegistered={isVisitedRegistered}
             />
             
             <h2 className="text-uppercase">{titulo}</h2>
@@ -143,27 +150,25 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
             <h1>Nota: Revisa primero las restricciones existentes de <button className="btn btn-warning" type="button" onClick={handleClick}>BIOSEGURIDAD</button></h1>
 
             <h1>{name}</h1>
-            <form onSubmit={(e)=>{handleSubmit(e)}} noValidate autoComplete="off">
+            <form
+            style={{ backgroundImage: `url("./assets/pie_pagina_ojai.png")` }}
+             onSubmit={(e)=>{handleSubmit(e)}}
+            noValidate autoComplete="off">
                 <div className="content-form" >
-
                     <div className="mb-10">
-                        
                         <h4>Origen</h4>
-                    
                         <TextField
                             disabled
                             id="standard-select-currency"
                             select
                             label="Select"
                             value={ciudad}
-                            
                             /* Show Date of your last visit */
-                            helperText={'Ultima Granja Visitada: ' +last_farm.frm_name +' '+last_farm.frm_visited_date}
-
+                            helperText={'Ultima visita: ' +lastFarmVisited.farm_name +' '+lastFarmVisited.farm_date}
                         >
-                            {granjas.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>
-                                    {option.label.toUpperCase()}
+                            {farms.map((option) => (
+                                <MenuItem key={option.frm_id} value={option.frm_id}>
+                                    {option.frm_name.toUpperCase()}
                                 </MenuItem>
                             ))}
                         </TextField>
@@ -171,8 +176,8 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                     </div>
                     <div className="mb-30">
                         <span>Estatus (Origen) {' '}</span>
-                        <span className={granjas[parseInt(ciudad) - 1].status === 'Libre' ? 'libre' : 'noLibre'}>
-                            {granjas[parseInt(ciudad) - 1].status}
+                        <span className={farms[ciudad].frm_restriction[0].status === 'Libre' ? 'libre' : 'noLibre'}>
+                            {farms[ciudad].frm_restriction[0].status}
                         </span>
                     </div>
                     <div className="mb-10">
@@ -187,9 +192,9 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                             helperText="Porfavor selecciona el destino"
                         >
 
-                            {granjas.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>
-                                    {option.label.toUpperCase()}
+                            {farms.map((option) => (
+                                <MenuItem key={option.frm_id} value={option.frm_id}>
+                                    {option.frm_name.toUpperCase()}
                                 </MenuItem>
                             ))}
                         </TextField>
@@ -198,14 +203,15 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                     </div>
                     <div className="mb-10">
                         <span>Estatus (Destino) {' '}</span>
-                        <span className={granjas[parseInt(ciudad2) - 1].status === 'Libre' ? 'libre' : 'noLibre'}>
-                            {granjas[parseInt(ciudad2) - 1].status}
+                        <span className={farms[ciudad2].frm_restriction[0].status === 'Libre' ? 'libre' : 'noLibre'}>
+                            {farms[ciudad2].frm_restriction[0].status}
                         </span>
                     </div>
                     
                 </div>
 
                 <div className="show__restriccion">
+                    <p>{takeScreen? 'Tomar Captura': ''}</p>
                     <h4 className="mb-30">Restricción Actual</h4>
                     <div style={{ textAlign: 'center' }}>
 
@@ -214,13 +220,13 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                             granjas[parseInt(ciudad) - 1].destinosConAutorizacion.includes(ciudad2) ? 'No deberá asistir / requiere autorización' :
                             granjas[parseInt(ciudad) - 1].destinosConPrevencion.includes(ciudad2) && 'Podrá asistir, utilizando ropa de tránsito limpia y proporcionada por la Operación.'
                         }
-                        <br /><br /><br /><br /><br />
+                        <br /><br /><br />
                         {
-                            loading ? '' : granjas[parseInt(ciudad) - 1].destinosConAutorizacion.includes(ciudad2) ? granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1] : ''
+                            loading ? '' : farms[ciudad].frm_restriction[0].destinosConAutorizacion.includes(String(ciudad2)) ? farms[ciudad].frm_restriction[0].noches[parseInt(ciudad2) - 1] : ''
                         }
 
                         {
-                            loading ? '' : granjas[parseInt(ciudad) - 1].noches[parseInt(ciudad2) - 1] === '1' ? ' noche' : ' noches'
+                            loading ? '' : farms[ciudad].frm_restriction[0].noches[parseInt(ciudad2) - 1] === 1 ? ' noche' : ' noches'
                         }
                         {
                             loading && <Loader
@@ -232,7 +238,7 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                             />
                         }
                         
-                        {hizoClickSiguiente ? cumpleCuarentena ?
+                        {cumpleCuarentena ?
                          <div>
                              <img className="logo-ojai" src='./assets/success.png' alt="Logo Ojai" />
                              <h6>SI CUMPLE CON CUARENTENA</h6>
@@ -240,7 +246,7 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                          <div>
                              <img className="logo-ojai" src='./assets/danger.png' alt="Logo Ojai" />
                              <h5>NO CUMPLE CON CUARENTENA</h5>
-                        </div> : ''}
+                        </div>}
                         
                     </div>
 
@@ -249,6 +255,9 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                     <div className="col-lg-2">
                    {
                     loading ? '' : <button type="button" onClick={verificarCuarentena} className="btn btn-primary">Siguiente</button>
+                    }
+                   {
+                    cumpleCuarentena ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''
                     }
                     {
                             loading && <Loader
@@ -261,7 +270,7 @@ const TemplateMonitoreo = ({region, granjas, titulo, nombreTabla }) => {
                         }
                     </div>
                     <div className="col-lg-2">
-                    {hizoClickSiguiente ? cumpleCuarentena ? <button type="submit" className="btn btn-primary">Guardar</button> : '' : ''}
+                    {takeScreen ? cumpleCuarentena ? <button type="submit" className="btn btn-primary">Guardar</button> : '' : ''}
                     </div>
                 </div>
             </form>

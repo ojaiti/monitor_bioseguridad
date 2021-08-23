@@ -71,7 +71,7 @@ export const LoginScreen = () => {
           return response.json();
         })
         .then(function(json2){
-          fetch("http://127.0.0.1:8000/farms/"+json2.farm_frm_visited_id)
+          fetch("http://127.0.0.1:8000/farms/"+json2[0].FarmsVisited.farm_frm_visited_id)
           .then(function(response) {
             return response.json();
           })
@@ -82,9 +82,12 @@ export const LoginScreen = () => {
             const user_detail = {
               "id":json.id,
               "username": json.username,
-              "frm_name" : json3.frm_name,
-              "frm_visited_date": json2.frm_visited_date,
-              "farm_frm_visited_id": json2.farm_frm_visited_id
+              "nombre": json.nombre,
+              "apellidos": json.apellidos,
+              "frm_name" : json2[0].Farm.frm_name,
+              "frm_visited_date": json2[0].FarmsVisited.frm_visited_date,
+              "farm_frm_visited_id": json2[0].FarmsVisited.farm_frm_visited_id,
+              "quarentine_nights": json2[0].FarmsVisited.frm_visited_quarantine_nights
             }
 
             dispatch({

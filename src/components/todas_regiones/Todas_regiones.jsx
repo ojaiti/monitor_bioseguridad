@@ -5,7 +5,6 @@ import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useHistory } from "react-router-dom";
-import noroeste from '../../data/noroeste'
 const Todas_regiones = () => {
     const granjas  = [
         {
