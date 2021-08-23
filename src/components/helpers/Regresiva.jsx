@@ -56,7 +56,7 @@ const Regresiva = ({forwardedRef, parentCallback, isVisitedRegistered}) => {
     };
     useEffect(() => {
         setPause(false);
-        console.log('Days: ', mostrarDate.days)
+        console.log('Days 1: ', mostrarDate.days)
         intervalRef.current = setInterval(decreaseDate, 1000);
         return () => {
           console.log('Days 2: ', mostrarDate.days)
