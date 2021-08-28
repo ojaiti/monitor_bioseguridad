@@ -1,5 +1,4 @@
 import React, { useContext } from 'react'
-import axios from 'axios';
 import { AuthContext } from '../../auth/AuthContext';
 import lastFarmsVisitedByUser from '../helpers/API/lastFarmsVisitedByUser';
 
@@ -13,7 +12,7 @@ const Last_farms_visited = () => {
         farmsVisited(user_detail.id, controller_signal)
         return () => controller_signal.abort()
         
-      }, []);
+      }, [user_detail.id]);
 
       const farmsVisited = (user_id, controller_signal) => {
         

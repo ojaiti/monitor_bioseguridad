@@ -8,19 +8,49 @@ import TemplateMonitoreo from '../helpers/TemplateMonitoreo'
 
 const MonitorNoroeste = () => {
     const [farms, setFarms] = useState(null)
+    const [farmId, setFarmId]  = useState(1)
     const [farmVisitedByUser, setfarmVisitedByUser] = useState(null)
+    const [nochesFarmId, setNochesFarmId] = useState(null)
     const { user:{ user_detail }} = useContext(AuthContext);
 
      useEffect(() => {
         farmsByRegion(1)
         lastOneFarmByUser(user_detail.id)
-    },[])
-    const farmsByRegion = (region) => {
+    },[user_detail.id])
+
+    /* const farmsByRegion = (region) => {
         getFarmsByRegion(region)
         .then((data)=>{
             setFarms(data)
         })
+    } */
+
+    const farmsByRegion = (region) => {
+        var extract = [] /* Array para cambiar el id de las granjas por el frm_id */
+        var nochesWithFarmId = [] /* Array para cambiar el indice y comparar con noches y dias autorizados */
+        getFarmsByRegion(region)
+        .then((data)=>{
+            const initialFrmId = data[0].frm_id
+           
+            /* ID DE LA ULTIMA GRANJA */
+            const endFrmId = data.length + initialFrmId - 1
+            /* Si se borra un id de alguna granja el programa podria caerse */
+            setFarmId(data[0].frm_id)
+            console.log('restriction', data[0].frm_restriction)
+            /* Agreamos la clave de la granja como indice al array de granjas */
+            var count = 0;
+            data.map((farm, index) => {
+               extract[farm.frm_id] = farm
+               nochesWithFarmId[farm.frm_id] = count
+               count++;
+            })
+            setNochesFarmId(nochesWithFarmId)
+            setFarms(extract)
+            count = 0
+        })
     }
+
+    
 
     const lastOneFarmByUser = (user_id) => {
         lastOneFarmVisitedByUser(user_id)
@@ -38,7 +68,7 @@ const MonitorNoroeste = () => {
     if (!farmVisitedByUser) return null;
     return (
         <div>
-            <TemplateMonitoreo region={1} farms={farms} lastFarmVisited = {farmVisitedByUser} granjas={noroeste} titulo={'Noroeste'} nombreTabla={'tablanoroeste'} />
+            <TemplateMonitoreo region={1} farms={farms} nochesFarmId={nochesFarmId} lastFarmVisited = {farmVisitedByUser} farmId = {farmId} granjas={noroeste} titulo={'Noroeste'} nombreTabla={'tablanoroeste'} />
         </div>
     )
 }
