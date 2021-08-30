@@ -23,11 +23,13 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
     /* Envio de ultima fecha de la granja visitada mas noches */
     const [lastDateVisitedFarm, setLastDateVisitedFarm ] = useState(null)
     const [testRederizado, setTestRenderizado] = useState(false)
+    const [ejecutar, setEjecutar] = useState(false)
 
     const [enviarDato, setEnviarDato] = useState(false)
     /* isVisitedRegistered */
     const [isVisitedRegistered, setIsVisitedRegistered] = useState(false)
     /* Click en guardar */
+    const [clickGuardar, setClickGuardar] = useState(false)
     /* Use Ref */
     var dateQuarantined = useRef({'days':0,'hours':0,'minutes':0,'seconds':0})
 
@@ -38,12 +40,8 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
     const [last_farm, setLastFarm] = useState(user_detail)
 
     /* Use Callback */
-    
     const callback = useCallback((value) => {
-        console.log('value', value)
-        console.log('No entró')
         cuarentena.current = value
-        /* setFinCuarentena(value); */
     }, []);
     /* Esta funcion dispara el Loader */
     const handleLoading = () => {
@@ -55,9 +53,11 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
 
 
     const lastOneFarmByUser = (user_id) => {
+        console.log('EXECUTE')
         lastOneFarmVisitedByUser(user_id)
         .then((data) => {
           const user_detail = {
+              "creado": true,
             "farm_frm_visited_id": data[0].FarmsVisited.farm_frm_visited_id,
             "frm_visited_date": data[0].FarmsVisited.frm_visited_date,
             "quarentine_nights": data[0].FarmsVisited.frm_visited_quarantine_nights
@@ -67,6 +67,8 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
 
             setLastDateVisitedFarm(user_detail)
             setTestRenderizado(true)
+
+            /* Actualizar un vez mas este useState */
             
         })
       }
@@ -74,7 +76,8 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
    useEffect(() => {
     console.log('Hello')
     lastOneFarmByUser(user_detail.id)
-   }, [user_detail.id])
+    
+   }, [])
 
 
     
@@ -113,16 +116,17 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                 return response.json();
             })
             .then(function(res){
-
-                
                 const user_detail2 = {
                     farm_frm_visited_id : res.FarmsVisited.frm_visited_id,
                     frm_name : res.Farm.frm_name,
                     frm_visited_date : res.FarmsVisited.frm_visited_date,
                     id : res.User.id,
-                    username : res.User.username
+                    username : res.User.username,
+                    quarentine_nights: res.FarmsVisited.frm_visited_quarantine_nights
                 }
                 setLastFarm(user_detail2)
+
+                setLastDateVisitedFarm(user_detail2)
                 setIsVisitedRegistered(true)
             })
 
@@ -130,6 +134,9 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
 
         /* Actualizar la cuenta regresiva */
         setEnviarDato(true)
+        setClickGuardar(true)
+        setEjecutar(true)
+        
         e.preventDefault()  
     }
     
@@ -141,9 +148,7 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
         handleLoading()
     };
 /* Cumple o no Con Cuarentena */
-    
     const verificarCuarentena = (event) => {
-        
         setHizoClickSiguiente(true)
         if(cuarentena.current.days > 0 || cuarentena.current.hours > 0 || cuarentena.current.minutes > 0 || cuarentena.current.seconds > 0){
             setCumpleCuarentena(false)
@@ -162,12 +167,6 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
     return (
         <div className="main__body">
             {/* Tiempo Restante para tu proxima visita a granja */}
-            {/* <CuentaRegresiva
-            fecha={last_farm.frm_visited_date}
-            noches = {noches == 0 ? -1 : noches}
-            setFinCuarentena={setFinCuarentena} 
-            /> */}
-
             
             {!testRederizado ? '' :
                 <Regresiva 
@@ -175,22 +174,18 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                 forwardedRef={dateQuarantined}
                 parentCallback={callback}
                 isVisitedRegistered={isVisitedRegistered}
-                enviarDato= {enviarDato ? enviarDato : null }
-                numero = {5}
                 lastDateVisitedFarm = {lastDateVisitedFarm}
                 />
             }
-            
             <h2 className="text-uppercase">{titulo}</h2>
-            
             
             <h1>Nota: Revisa primero las restricciones existentes de <button className="btn btn-warning" type="button" onClick={handleClick}>BIOSEGURIDAD</button></h1>
 
             <h1>{user_detail.nombre} {user_detail.apellidos}</h1>
             <form
-            style={{ backgroundImage: `url("./assets/pie_pagina_ojai.png")` }}
-             onSubmit={(e)=>{handleSubmit(e)}}
-            noValidate autoComplete="off">
+                style={{ backgroundImage: `url("./assets/pie_pagina_ojai.png")` }}
+                onSubmit={(e)=>{handleSubmit(e)}}
+                noValidate autoComplete="off">
                 <div className="content-form" >
                     <div className="mb-10">
                         <h4>Origen</h4>
@@ -221,6 +216,7 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                         <h4>Destino</h4>
 
                         <TextField
+                            disabled={false}
                             id="standard-select-currency2"
                             select
                             label="Select"
@@ -251,27 +247,15 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                     <p className="text-danger h4">{takeScreen? 'Tomar Captura': ''}</p>
                     <h4 className="mb-30">Restricción Actual</h4>
                     <div style={{ textAlign: 'center' }}>
-
                        
-                        <br /><br /><br />
-                        {
-                            farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]
-                        }
-
-                        {
-                            loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === 1 ? ' noche' : ' noches'
-                        }
-                        {
-                            loading && <Loader
-                                type="Oval"
-                                color="#00BFFF"
-                                height={30}
-                                width={30}
-                                timeout={timeLoader} //3 secs
-                            />
-                        }
+                        <br /><br />
                         
-                        {!hizoClickSiguiente ? '' : cumpleCuarentena  ?
+                        { loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]}
+                        { loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === 1 ? ' noche' : ' noches'}
+                        { loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /* 3 secs */ /> }
+                        
+                        {
+                        !hizoClickSiguiente ? '' : cumpleCuarentena  ?
                             <div>
                             <img className="logo-ojai" src='./assets/success.png' alt="Logo Ojai" />
                             <h6>SI CUMPLE CON CUARENTENA</h6>
@@ -280,41 +264,23 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                          <div>
                              <img className="logo-ojai" src='./assets/danger.png' alt="Logo Ojai" />
                              <h5>NO CUMPLE CON CUARENTENA</h5>
-                        </div>}
+                        </div>
+                        }
                         
                     </div>
 
                 </div>
                 <div className="col-lg-12 d-flex justify-content-center">
                     <div className="col-lg-2">
-                   {
-                    loading ? '' : <button type="button" onClick={verificarCuarentena} className="btn btn-primary">Siguiente</button>
-                    }
-                   {
-                    hizoClickSiguiente ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''
-                    }
-                    {
-                            loading && <Loader
-                                type="Oval"
-                                color="#00BFFF"
-                                height={30}
-                                width={30}
-                                timeout={timeLoader} //3 secs
-                            />
-                        }
+                        {loading ? '' : <button type="button" onClick={verificarCuarentena} className="btn btn-primary">Siguiente</button>}
+                        { hizoClickSiguiente ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''}
+                        {loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /* 3 sec */ />}
                     </div>
                     <div className="col-lg-2">
-                    { hizoClickSiguiente2 ? takeScreen ? cumpleCuarentena ? <button type="submit" className="btn btn-primary">Guardar</button> : '' : '' : ''}
+                        { hizoClickSiguiente2 ? takeScreen ? cumpleCuarentena ? <button type="submit" onClick={()=>{return true}} className="btn btn-primary">Guardar</button> : '' : '' : ''}
                     </div>
                 </div>
             </form>
-
-
-
-
-
-
-
         </div>
     )
 }

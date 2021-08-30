@@ -1,14 +1,10 @@
 import React, { useRef, useEffect, useState, useContext } from 'react'
-import { AuthContext } from '../../auth/AuthContext';
 import 'moment-timezone';
-import lastOneFarmVisitedByUser from './API/lastOneFarmVisitedByUser';
-const Regresiva = ({forwardedRef, parentCallback, isVisitedRegistered, enviarDato, numero, lastDateVisitedFarm}) => {
+const Regresiva = ({forwardedRef, parentCallback, lastDateVisitedFarm}) => {
 
-  const { user:{ user_detail }} = useContext(AuthContext);
   const [mostrarDate, setMostrarDate] = useState({'days':0,'hours':0,'minutes':0,'seconds':0})
-    const [numeroTest, setNumeroTest] = useState(2)
-    const [datailQuarantine, setDetailQuarantine] = useState(user_detail)
 
+    console.log('lastOneFarmVisitedByUser: ', lastDateVisitedFarm)
     var end = new Date(sumarDias(lastDateVisitedFarm.frm_visited_date, lastDateVisitedFarm.quarentine_nights));
     function sumarDias(fecha, noches) {
       const fechaFinal = new Date(fecha)
@@ -49,23 +45,17 @@ const Regresiva = ({forwardedRef, parentCallback, isVisitedRegistered, enviarDat
 
 
     useEffect(() => {
-      if(enviarDato){
-        setNumeroTest(numero)
-        
-  
-      }
         intervalRef.current = setInterval(decreaseDate, 1000);
         return () => {
           clearInterval(intervalRef.current)
         };
-      }, [decreaseDate]);
+      }, [lastDateVisitedFarm, decreaseDate]);
       
       
     
     return (
       <div className="main__body">
         {/* Numero test */}
-        <p>Numero test: {numeroTest}</p>
         <h1>Tiempo restante </h1>
         <h1>Dias: {mostrarDate.days < 0 ? 0 : mostrarDate.days}, Horas: {mostrarDate.hours < 0 ? 0 : mostrarDate.hours}, Minutos: {mostrarDate.minutes < 0 ? 0 : mostrarDate.minutes}, Segundos: {mostrarDate.seconds < 0 ? 0 : mostrarDate.seconds}</h1>
       </div>
