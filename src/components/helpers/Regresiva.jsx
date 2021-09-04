@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useContext } from 'react'
 import 'moment-timezone';
-const Regresiva = ({forwardedRef, parentCallback, lastDateVisitedFarm}) => {
+const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
 
   const [mostrarDate, setMostrarDate] = useState({'days':0,'hours':0,'minutes':0,'seconds':0})
 

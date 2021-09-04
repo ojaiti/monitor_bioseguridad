@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Navbar } from '../components/ui/Navbar';
 import { Switch, Route, Redirect } from 'react-router-dom';
 /* 
@@ -15,12 +15,18 @@ import TablaTehuacan from '../components/tehuacan/TablaTehuacan';
 import MonitorCordoba from '../components/cordoba/MonitorCordoba';
 import TablaCordoba from '../components/cordoba/TablaCordoba';
 import Aciones_Preventivas from '../components/acciones_preventivas/Aciones_Preventivas';
-import Todas_regiones from '../components/todas_regiones/Todas_regiones';
+import Regiones from '../components/regiones/MonitorRegiones';
 import Last_farms_visited from '../components/last_farms_visited_by_user/Last_farms_visited';
+import { AuthContext } from '../auth/AuthContext';
+import TablaRegiones from '../components/regiones/TablaRegiones';
 
 export const DashboardRoutes = () => {
 
-
+    const { user:{user_detail } } = useContext(AuthContext);
+    console.log('user_detail Dashboard', user_detail)
+    const reg_id =  user_detail.reg_id
+    const regiones = ['noroeste', 'veracruz', 'tehuacan', 'cordoba']
+    const region_name = "/" + regiones[reg_id - 1]
     return (
         <>
             <Navbar />
@@ -35,7 +41,8 @@ export const DashboardRoutes = () => {
                     <Route exact path="/tablatehuacan" component={ TablaTehuacan } />
                     <Route exact path="/cordoba" component={ MonitorCordoba } />
                     <Route exact path="/tablacordoba" component={ TablaCordoba } />
-                    <Route exact path="/todas_regiones" component={ Todas_regiones } />
+                    <Route exact path="/regiones" component={ Regiones } />
+                    <Route exact path="/tablaregiones" component={ TablaRegiones } />
                     <Route exact path="/acciones_preventivas" component={ Aciones_Preventivas } />
                     <Route exact path="/visitas" component={ Last_farms_visited } />
                     {/* <Route exact path="/marvel" component={ MarvelScreen } />
@@ -43,7 +50,7 @@ export const DashboardRoutes = () => {
                     <Route exact path="/dc" component={ DcScreen } />
                     <Route exact path="/search" component={ SearchScreen } /> */}
 
-                    <Redirect to="/noroeste" />
+                    <Redirect to={region_name} /> {/* Ultima granja visitada */}
                 </Switch>
             </div>
 

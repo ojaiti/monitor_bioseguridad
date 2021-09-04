@@ -8,9 +8,9 @@ import { useHistory } from "react-router-dom";
 import { AuthContext } from '../../auth/AuthContext';
 import Regresiva from './Regresiva';
 import lastOneFarmVisitedByUser from './API/lastOneFarmVisitedByUser';
+import RegionNoVisible from './RegionNoVisible';
 
-
-const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granjas, titulo, nombreTabla }) => {
+const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo, nombreTabla }) => {
     const { user:{user_detail }} = useContext(AuthContext);
     const [ciudad, setCiudad] = React.useState(lastFarmVisited.farm_id);
     const [ciudad2, setCiudad2] = React.useState(farmId);
@@ -19,25 +19,13 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
     const [cumpleCuarentena, setCumpleCuarentena] = useState(false)
     const [hizoClickSiguiente, setHizoClickSiguiente] = useState(false)
     const [hizoClickSiguiente2, setHizoClickSiguiente2] = useState(false)
-    const [cambioGranja, setCambioGranja] = useState(false)
     /* Envio de ultima fecha de la granja visitada mas noches */
     const [lastDateVisitedFarm, setLastDateVisitedFarm ] = useState(null)
     const [testRederizado, setTestRenderizado] = useState(false)
-    const [ejecutar, setEjecutar] = useState(false)
-
-    const [enviarDato, setEnviarDato] = useState(false)
-    /* isVisitedRegistered */
-    const [isVisitedRegistered, setIsVisitedRegistered] = useState(false)
-    /* Click en guardar */
-    const [clickGuardar, setClickGuardar] = useState(false)
-    /* Use Ref */
-    var dateQuarantined = useRef({'days':0,'hours':0,'minutes':0,'seconds':0})
-
     /* Tiempo de carga para el loader */
     const timeLoader = 1000
     var cuarentena = useRef({'days':0,'hours':0,'minutes':0,'seconds':0})
-    //Se obtiene los datos del usuario actual
-    const [last_farm, setLastFarm] = useState(user_detail)
+    
 
     /* Use Callback */
     const callback = useCallback((value) => {
@@ -53,37 +41,24 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
 
 
     const lastOneFarmByUser = (user_id) => {
-        console.log('EXECUTE')
         lastOneFarmVisitedByUser(user_id)
         .then((data) => {
           const user_detail = {
-              "creado": true,
             "farm_frm_visited_id": data[0].FarmsVisited.farm_frm_visited_id,
             "frm_visited_date": data[0].FarmsVisited.frm_visited_date,
             "quarentine_nights": data[0].FarmsVisited.frm_visited_quarantine_nights
           }
-            console.log('data user', data[0])
-            console.log('data user_detail', user_detail)
-
             setLastDateVisitedFarm(user_detail)
             setTestRenderizado(true)
-
             /* Actualizar un vez mas este useState */
             
         })
       }
 
    useEffect(() => {
-    console.log('Hello')
     lastOneFarmByUser(user_detail.id)
-    
    }, [])
 
-
-    
-
-    /* Get all farms by region */
-    
     /* Function para cambiar a la seccion de BIOSEGURIDAD */
     let history = useHistory();
     const handleClick = () => {
@@ -109,7 +84,6 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
         }).then(res => res.json())
         .catch(error => console.error('Error:', error))
         .then(response => {
-            console.log('Success:', response)
             setCiudad(ciudad2)
             fetch("http://127.0.0.1:8000/details_visited/"+response.user_frm_visited_id)
             .then(function(response) {
@@ -124,18 +98,11 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                     username : res.User.username,
                     quarentine_nights: res.FarmsVisited.frm_visited_quarantine_nights
                 }
-                setLastFarm(user_detail2)
-
                 setLastDateVisitedFarm(user_detail2)
-                setIsVisitedRegistered(true)
             })
-
         });
 
         /* Actualizar la cuenta regresiva */
-        setEnviarDato(true)
-        setClickGuardar(true)
-        setEjecutar(true)
         
         e.preventDefault()  
     }
@@ -152,28 +119,25 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
         setHizoClickSiguiente(true)
         if(cuarentena.current.days > 0 || cuarentena.current.hours > 0 || cuarentena.current.minutes > 0 || cuarentena.current.seconds > 0){
             setCumpleCuarentena(false)
-            console.log('No cumple cuarentena')
         }
         else{
             setCumpleCuarentena(true)
-            console.log(' cumple cuarentena')
         }
     }
     const verificarTakeScreen = () => {
         hizoClickSiguiente ? setTakeScreen(true) : setTakeScreen(false)
         setHizoClickSiguiente2(true)
     }
-    
+    if(farms[ciudad]?.frm_restriction[0] === undefined){
+        return <RegionNoVisible />
+    }
     return (
         <div className="main__body">
             {/* Tiempo Restante para tu proxima visita a granja */}
             
             {!testRederizado ? '' :
                 <Regresiva 
-                fecha={last_farm.frm_visited_date}
-                forwardedRef={dateQuarantined}
                 parentCallback={callback}
-                isVisitedRegistered={isVisitedRegistered}
                 lastDateVisitedFarm = {lastDateVisitedFarm}
                 />
             }
@@ -231,7 +195,6 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                                 </MenuItem>
                             ))}
                         </TextField>
-
                                
                     </div>
                     <div className="mb-10">
@@ -240,20 +203,16 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                             {farms[ciudad2].frm_restriction[0].status}
                         </span>
                     </div>
-                    
                 </div>
 
                 <div className="show__restriccion">
                     <p className="text-danger h4">{takeScreen? 'Tomar Captura': ''}</p>
                     <h4 className="mb-30">Restricción Actual</h4>
                     <div style={{ textAlign: 'center' }}>
-                       
                         <br /><br />
-                        
                         { loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]}
                         { loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === 1 ? ' noche' : ' noches'}
                         { loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /* 3 secs */ /> }
-                        
                         {
                         !hizoClickSiguiente ? '' : cumpleCuarentena  ?
                             <div>
@@ -266,10 +225,9 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, granja
                              <h5>NO CUMPLE CON CUARENTENA</h5>
                         </div>
                         }
-                        
                     </div>
-
                 </div>
+                
                 <div className="col-lg-12 d-flex justify-content-center">
                     <div className="col-lg-2">
                         {loading ? '' : <button type="button" onClick={verificarCuarentena} className="btn btn-primary">Siguiente</button>}

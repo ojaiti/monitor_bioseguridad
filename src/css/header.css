@@ -1,4 +1,26 @@
 nav {
   background: #1976d2;
   box-shadow: 1px 2px 5px 2px grey;
+  transition: 1s;
+}
+.open__close__icon {
+  display: none;
+}
+
+
+@media only screen and (max-width: 600px) {
+  nav{
+    height: 50px;
+    overflow: hidden;
+  }
+  .open__close__nav{
+    height: 360px;
+  }
+  .open__close__icon {
+    display: block;
+    cursor: pointer;
+  }
+  body {
+    background-color: lightblue;
+  }
 }

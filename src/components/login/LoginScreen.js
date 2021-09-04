@@ -87,7 +87,8 @@ export const LoginScreen = () => {
               "frm_name" : json2[0].Farm.frm_name,
               "frm_visited_date": json2[0].FarmsVisited.frm_visited_date,
               "farm_frm_visited_id": json2[0].FarmsVisited.farm_frm_visited_id,
-              "quarentine_nights": json2[0].FarmsVisited.frm_visited_quarantine_nights
+              "quarentine_nights": json2[0].FarmsVisited.frm_visited_quarantine_nights,
+              "reg_id" : json3.region_frm_id
             }
 
             dispatch({

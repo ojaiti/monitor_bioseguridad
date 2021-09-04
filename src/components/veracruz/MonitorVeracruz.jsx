@@ -23,10 +23,6 @@ const MonitorVeracruz = () => {
         var nochesWithFarmId = [] /* Array para cambiar el indice y comparar con noches y dias autorizados */
         getFarmsByRegion(region)
         .then((data)=>{
-            const initialFrmId = data[0].frm_id
-           
-            /* ID DE LA ULTIMA GRANJA */
-            const endFrmId = data.length + initialFrmId - 1
             /* Si se borra un id de alguna granja el programa podria caerse */
             setFarmId(data[0].frm_id)
             console.log('restriction', data[0].frm_restriction)
