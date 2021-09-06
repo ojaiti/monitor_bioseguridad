@@ -6,12 +6,28 @@ import Regresiva from '../helpers/Regresiva';
 import regiones from '../../data/regiones'
 import { MenuItem, TextField } from '@material-ui/core'
 import { useHistory } from 'react-router'
+import Loader from 'react-loader-spinner';
+
+/* Modal Confiramacion */
+
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Slide from '@material-ui/core/Slide';
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
 
 const MonitorRegion = () => {
 
 
     const [ciudad, setCiudad] = React.useState('1');
-    const [ciudad2, setCiudad2] = React.useState('2');
+    const [ciudad2, setCiudad2] = React.useState('1');
+    const [ciudad3, setCiudad3] = React.useState('1');
     const [farms, setFarms] = useState(null)
     const [hizoClickSiguiente, setHizoClickSiguiente] = useState(false)
     const [cumpleCuarentena, setCumpleCuarentena] = useState(false)
@@ -19,14 +35,35 @@ const MonitorRegion = () => {
     const [farmId, setFarmId]  = useState(1)
     const [farmVisitedByUser, setfarmVisitedByUser] = useState(null)
     const [nochesFarmId, setNochesFarmId] = useState(null)
+    const [open, setOpen] = React.useState(false);
+    const [confirm, setConfirm] = React.useState(false);
+    const [showNext, setShowNext ] = React.useState(true);
+
+  
+   
     const { user:{ user_detail }} = useContext(AuthContext);
     const titulo = 'Regiones';
     const nombreTabla = 'tablaregiones'
 
+
+    const handleClickOpen = () => {
+        setOpen(true);
+      };
+    
+      const handleClose = () => {
+        setOpen(false);
+        setConfirm(false);
+      };
+      const handleConfirm = () => {
+          setOpen(false);
+          setConfirm(true);
+          setShowNext(false);
+      }
+
      useEffect(() => {
-        farmsByRegion(1)
+        farmsByRegion(parseInt(ciudad2))
         lastOneFarmByUser(user_detail.id)
-    },[user_detail.id])
+    },[ciudad2])
 
     const farmsByRegion = (region) => {
         var extract = [] /* Array para cambiar el id de las granjas por el frm_id */
@@ -34,8 +71,7 @@ const MonitorRegion = () => {
         getFarmsByRegion(region)
         .then((data)=>{
             /* Si se borra un id de alguna granja el programa podria caerse */
-            setFarmId(data[0].frm_id)
-            console.log('restriction', data[0].frm_restriction)
+            console.log('restriction', data)
             /* Agreamos la clave de la granja como indice al array de granjas */
             var count = 0;
             data.map((farm, index) => {
@@ -43,21 +79,19 @@ const MonitorRegion = () => {
                nochesWithFarmId[farm.frm_id] = count
                count++;
             })
-            setNochesFarmId(nochesWithFarmId)
+            setCiudad3(data[0].frm_id)
             setFarms(extract)
+            
             count = 0
+            setLoading(true)
         })
     }
 
-    const verificarCuarentena = (event) => {
+    console.log('Hello')
+   /*  const verificarCuarentena = (event) => {
         setHizoClickSiguiente(true)
-        if(cuarentena.current.days > 0 || cuarentena.current.hours > 0 || cuarentena.current.minutes > 0 || cuarentena.current.seconds > 0){
-            setCumpleCuarentena(false)
-        }
-        else{
-            setCumpleCuarentena(true)
-        }
-    }
+        alert('Work')
+    } */
 
     const lastOneFarmByUser = (user_id) => {
         lastOneFarmVisitedByUser(user_id)
@@ -83,19 +117,53 @@ const MonitorRegion = () => {
         cuarentena.current = value
     }, []);
 
-    const handleSubmit = () => {
+    const handleSubmit = (e) => {
+        e.preventDefault()
         console.log('¿sumit')
     }
     const handleChange2 = (event) => {
-        console.log('a')
         setCiudad2(event.target.value);
-        console.log('uu', event.target.value)
     };
+    const handleChange3 = (event) => {
+        setCiudad3(event.target.value);
+    };
+
     if (!farms) return null;
     if (!farmVisitedByUser) return null;
     return (
         
         <div className="main__body">
+
+            {/* Dialog confirmacion */}
+            <div>
+        
+        <Dialog
+          open={open}
+          TransitionComponent={Transition}
+          keepMounted
+          onClose={handleClose}
+          aria-labelledby="alert-dialog-slide-title"
+          aria-describedby="alert-dialog-slide-description"
+        >
+          <DialogTitle id="alert-dialog-slide-title">{"Estas seguro de elegir esta visita?"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-slide-description">
+              Una vez que des click en aceptar aparecerá el botón de guardar y si das click no habra marcha atras hasta que termine la cuarentea.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="secondary">
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirm} color="primary">
+              Aceptar
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+
+
+            
              <Regresiva 
                 parentCallback={callback}
                 lastDateVisitedFarm = {farmVisitedByUser}
@@ -121,7 +189,7 @@ const MonitorRegion = () => {
                             label="Select"
                             value={ciudad}
                             /* Show Date of your last visit */
-                           /*  helperText={'Ultima visita: ' +lastFarmVisited.farm_name +' '+lastFarmVisited.farm_date} */
+                            /* helperText={'Ultima visita: ' +lastFarmVisited.farm_name +' '+lastFarmVisited.farm_date} */
                         >
                             {regiones.map((region) => (
                                 <MenuItem key={region.value} value={region.value}>
@@ -133,15 +201,15 @@ const MonitorRegion = () => {
                     </div>
                     <div className="mb-30">
                         <span>Estatus (Origen) {' '}</span>
-                        <span className={farms[ciudad].frm_restriction[0].status === 'Libre' ? 'libre' : 'noLibre'}>
-                            {farms[ciudad].frm_restriction[0].status}
+                        <span className={regiones[parseInt(ciudad) -1].status === 'Libre' ? 'libre' : 'noLibre'}>
+                            {regiones[parseInt(ciudad) - 1].status}
                         </span>
                     </div>
                     <div className="mb-10">
                         <h4>Destino</h4>
 
                         <TextField
-                            disabled={false}
+                            disabled={confirm}
                             id="standard-select-currency2"
                             select
                             label="Select"
@@ -160,19 +228,48 @@ const MonitorRegion = () => {
                     </div>
                     <div className="mb-10">
                         <span>Estatus (Destino) {' '}</span>
-                        <span className={farms[ciudad2].frm_restriction[0].status === 'Libre' ? 'libre' : 'noLibre'}>
-                            {farms[ciudad2].frm_restriction[0].status}
+                        <span className={regiones[parseInt(ciudad2) - 1].status === 'Libre' ? 'libre' : 'noLibre'}>
+                            {regiones[parseInt(ciudad2) - 1].status}
                         </span>
                     </div>
                 </div>
 
+                <div className="mb-10">
+                        <h4>Destino</h4>
+
+                        <TextField
+                            disabled={confirm}
+                            id="standard-select-currency2"
+                            select
+                            label="Select"
+                            value={ciudad3}
+                            onChange={handleChange3}
+                            helperText="Porfavor selecciona el destino"
+                        >
+
+                            {farms.map((farm) => (
+                                <MenuItem key={farm.frm_id} value={farm.frm_id}>
+                                    {farm.frm_name.toUpperCase()}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                        <div className="mb-10">
+                        <span>Estatus (Destino) {' '}</span>
+
+                        <span className={farms[ciudad3]?.frm_restriction[0].status === 'Libre' ? 'libre' : 'noLibre'}>
+                            {farms[ciudad3]?.frm_restriction[0].status}
+                        </span>
+                    </div>
+                    </div>
+
                 <div className="show__restriccion">
                     {/* <p className="text-danger h4">{takeScreen? 'Tomar Captura': ''}</p> */}
+                    {confirm && 'Tomar captura'}
                     <h4 className="mb-30">Restricción Actual</h4>
                     <div style={{ textAlign: 'center' }}>
                         <br /><br />
-                        { loading ? '' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1]}
-                        { loading ? '' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === 1 ? ' noche' : ' noches'}
+                        { !loading ? '' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1]}
+                        { !loading ? '' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === 1 ? ' noche' : ' noches'}
                        {/*  { loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /> } */}
                         {/* {
                         !hizoClickSiguiente ? '' : cumpleCuarentena  ?
@@ -191,13 +288,15 @@ const MonitorRegion = () => {
                 
                 <div className="col-lg-12 d-flex justify-content-center">
                     <div className="col-lg-2">
-                        { loading ? '' : <button type="button" onClick={verificarCuarentena} className="btn btn-primary">Siguiente</button>}
+                        
+                        {loading ? <button type="button" onClick={handleClickOpen} className="btn btn-primary">Siguiente</button> : ''}
 
-                        {/* { hizoClickSiguiente ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''}
-                        {loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader}  />}  */}
+                        {/* { hizoClickSiguiente ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''} */}
+                        {loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={3000}  />}  
                     </div>
                     <div className="col-lg-2">
                         {/* { hizoClickSiguiente2 ? takeScreen ? cumpleCuarentena ? <button type="submit" onClick={()=>{return true}} className="btn btn-primary">Guardar</button> : '' : '' : ''} */}
+                        { confirm && <button type="submit"  className="btn btn-primary">Guardar</button> } 
                     </div>
                 </div>
             </form>

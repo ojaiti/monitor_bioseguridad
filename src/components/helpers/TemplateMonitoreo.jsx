@@ -231,7 +231,7 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
                 <div className="col-lg-12 d-flex justify-content-center">
                     <div className="col-lg-2">
                         {loading ? '' : <button type="button" onClick={verificarCuarentena} className="btn btn-primary">Siguiente</button>}
-                        { hizoClickSiguiente ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''}
+                        { hizoClickSiguiente && cumpleCuarentena ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''}
                         {loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /* 3 sec */ />}
                     </div>
                     <div className="col-lg-2">

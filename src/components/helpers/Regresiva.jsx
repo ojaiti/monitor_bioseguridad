@@ -4,7 +4,6 @@ const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
 
   const [mostrarDate, setMostrarDate] = useState({'days':0,'hours':0,'minutes':0,'seconds':0})
 
-    console.log('lastOneFarmVisitedByUser: ', lastDateVisitedFarm)
     var end = new Date(sumarDias(lastDateVisitedFarm.frm_visited_date, lastDateVisitedFarm.quarentine_nights));
     function sumarDias(fecha, noches) {
       const fechaFinal = new Date(fecha)
