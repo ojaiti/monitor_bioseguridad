@@ -118,8 +118,42 @@ const MonitorRegion = () => {
     }, []);
 
     const handleSubmit = (e) => {
+        var url = 'http://127.0.0.1:8000/farm_visited';
+        var data = {
+            "frm_visited_date": new Date(),
+            "frm_visited_quarantine_nights":regiones[ciudad -1].noches[parseInt(ciudad2) - 1],
+            "farm_frm_visited_id": ciudad3,
+            "user_frm_visited_id": user_detail.id
+        };
+
+        fetch(url, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers:{
+            'Content-Type': 'application/json'
+        }
+        }).then(res => res.json())
+        .catch(error => console.error('Error:', error))
+        .then(response => {
+            setCiudad(ciudad2)
+            fetch("http://127.0.0.1:8000/details_visited/"+response.user_frm_visited_id)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(res){
+                const user_detail2 = {
+                    farm_frm_visited_id : res.FarmsVisited.frm_visited_id,
+                    frm_name : res.Farm.frm_name,
+                    frm_visited_date : res.FarmsVisited.frm_visited_date,
+                    id : res.User.id,
+                    username : res.User.username,
+                    quarentine_nights: res.FarmsVisited.frm_visited_quarantine_nights
+                }
+                setfarmVisitedByUser(user_detail2)
+            })
+        });
         e.preventDefault()
-        console.log('¿sumit')
+      
     }
     const handleChange2 = (event) => {
         setCiudad2(event.target.value);
