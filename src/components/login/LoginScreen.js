@@ -50,7 +50,7 @@ export const LoginScreen = () => {
 
         if(tokenResponse.hasOwnProperty("access_token")){
           //Get User details
-          fetch(`${process.env.REACT_APP_API_PRODUCTION}`, {
+          fetch(`${process.env.REACT_APP_API_PRODUCTION}users/me/`, {
                 
             /* Aqui se obtiene la request a la info del usuario */
             headers: {
