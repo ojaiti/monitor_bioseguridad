@@ -3,14 +3,15 @@ import 'moment-timezone';
 const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
 
   const [mostrarDate, setMostrarDate] = useState({'days':0,'hours':0,'minutes':0,'seconds':0})
-
+    
     var end = new Date(sumarDias(lastDateVisitedFarm.frm_visited_date, lastDateVisitedFarm.quarentine_nights));
     function sumarDias(fecha, noches) {
       const fechaFinal = new Date(fecha)
       var f = fechaFinal.setDate(fechaFinal.getDate() + noches);
       return f;
     }
-
+    var dateRef = useRef(end);
+    console.log('DateRef: ', dateRef.current);
     let intervalRef = useRef();
     const decreaseDate = () => {
       var now = new Date();
@@ -27,14 +28,13 @@ const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
       var minutes = Math.floor((distance % _hour) / _minute);
       var seconds = Math.floor((distance % _minute) / _second);
 
-      
       if (days < 0 || hours < 0 || minutes < 0 || seconds < 0) {
         console.log('Wor')
         
         clearInterval(intervalRef.current);
       }else{
         setMostrarDate({'days':days,'hours':hours,'minutes':minutes,'seconds':seconds})
-        parentCallback({'days':days,'hours':hours,'minutes':minutes,'seconds':seconds})
+        
       }
       
     };
@@ -44,12 +44,22 @@ const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
 
 
     useEffect(() => {
-        intervalRef.current = setInterval(decreaseDate, 1000);
-        return () => {
-          clearInterval(intervalRef.current)
-        };
+      parentCallback(mostrarDate)
+      const dateToday = new Date()
+
+      console.log('Fecha final', end)
+      console.log('Fecha de hoy', dateToday)
+        if(end.getTime() < dateToday.getTime()){
+          console.log('GHeklo')
+        }else{
+          console.log('Se ejecutó')
+          intervalRef.current = setInterval(decreaseDate, 1000);
+          return () => {
+            clearInterval(intervalRef.current)
+          };
+        }
+        
       }, [lastDateVisitedFarm, decreaseDate]);
-      
       
     
     return (

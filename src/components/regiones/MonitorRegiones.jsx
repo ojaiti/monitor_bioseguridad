@@ -31,20 +31,26 @@ const MonitorRegion = () => {
     const [farms, setFarms] = useState(null)
     const [hizoClickSiguiente, setHizoClickSiguiente] = useState(false)
     const [cumpleCuarentena, setCumpleCuarentena] = useState(false)
-    const [loading, setLoading] = React.useState(false)
+    const [loading, setLoading] = React.useState(true)
     const [farmId, setFarmId]  = useState(1)
     const [farmVisitedByUser, setfarmVisitedByUser] = useState(null)
     const [nochesFarmId, setNochesFarmId] = useState(null)
     const [open, setOpen] = React.useState(false);
     const [confirm, setConfirm] = React.useState(false);
-    const [showNext, setShowNext ] = React.useState(true);
 
   
-   
+    const timeLoader = 1000
     const { user:{ user_detail }} = useContext(AuthContext);
     const titulo = 'Regiones';
     const nombreTabla = 'tablaregiones'
 
+    /* function de cargar */
+    const handleLoading = () => {
+        setLoading(true)
+        setTimeout(() => {
+            setLoading(false)
+        }, timeLoader)
+    }
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -57,12 +63,13 @@ const MonitorRegion = () => {
       const handleConfirm = () => {
           setOpen(false);
           setConfirm(true);
-          setShowNext(false);
       }
 
      useEffect(() => {
+
         farmsByRegion(parseInt(ciudad2))
         lastOneFarmByUser(user_detail.id)
+        handleLoading()
     },[ciudad2])
 
     const farmsByRegion = (region) => {
@@ -74,7 +81,7 @@ const MonitorRegion = () => {
             console.log('restriction', data)
             /* Agreamos la clave de la granja como indice al array de granjas */
             var count = 0;
-            data.map((farm, index) => {
+            data.map(farm => {
                extract[farm.frm_id] = farm
                nochesWithFarmId[farm.frm_id] = count
                count++;
@@ -83,7 +90,6 @@ const MonitorRegion = () => {
             setFarms(extract)
             
             count = 0
-            setLoading(true)
         })
     }
 
@@ -102,7 +108,9 @@ const MonitorRegion = () => {
                 "farm_frm_visited_id": data[0].Farm.frm_id,
                 "frm_visited_name": data[0].Farm.frm_name,
                 "frm_visited_date": data[0].FarmsVisited.frm_visited_date,
-                "quarentine_nights": data[0].FarmsVisited.frm_visited_quarantine_nights
+                "quarentine_nights": data[0].FarmsVisited.frm_visited_quarantine_nights,
+                "is_region": data[0].FarmsVisited.frm_visited_is_region
+
             })
         })
     }
@@ -118,12 +126,14 @@ const MonitorRegion = () => {
     }, []);
 
     const handleSubmit = (e) => {
+        const noches = regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === '-' ? 0 : regiones[ciudad -1].noches[parseInt(ciudad2) - 1]
         var url = 'http://127.0.0.1:8000/farm_visited';
         var data = {
             "frm_visited_date": new Date(),
-            "frm_visited_quarantine_nights":regiones[ciudad -1].noches[parseInt(ciudad2) - 1],
+            "frm_visited_quarantine_nights":noches,
             "farm_frm_visited_id": ciudad3,
-            "user_frm_visited_id": user_detail.id
+            "user_frm_visited_id": user_detail.id,
+            "frm_visited_is_region": 1
         };
 
         fetch(url, {
@@ -147,7 +157,8 @@ const MonitorRegion = () => {
                     frm_visited_date : res.FarmsVisited.frm_visited_date,
                     id : res.User.id,
                     username : res.User.username,
-                    quarentine_nights: res.FarmsVisited.frm_visited_quarantine_nights
+                    quarentine_nights: res.FarmsVisited.frm_visited_quarantine_nights,
+                    is_region: res.FarmsVisited.frm_visited_is_region
                 }
                 setfarmVisitedByUser(user_detail2)
             })
@@ -164,6 +175,8 @@ const MonitorRegion = () => {
 
     if (!farms) return null;
     if (!farmVisitedByUser) return null;
+
+    console.log("User_detail", farmVisitedByUser)
     return (
         
         <div className="main__body">
@@ -223,7 +236,7 @@ const MonitorRegion = () => {
                             label="Select"
                             value={ciudad}
                             /* Show Date of your last visit */
-                            /* helperText={'Ultima visita: ' +lastFarmVisited.farm_name +' '+lastFarmVisited.farm_date} */
+                            helperText={'Ultima visita: ' +farmVisitedByUser.frm_visited_name +' '+farmVisitedByUser.frm_visited_date}
                         >
                             {regiones.map((region) => (
                                 <MenuItem key={region.value} value={region.value}>
@@ -243,7 +256,7 @@ const MonitorRegion = () => {
                         <h4>Destino</h4>
 
                         <TextField
-                            disabled={confirm}
+                            disabled={farmVisitedByUser.is_region === 1 ? true:false}
                             id="standard-select-currency2"
                             select
                             label="Select"
@@ -272,7 +285,7 @@ const MonitorRegion = () => {
                         <h4>Destino</h4>
 
                         <TextField
-                            disabled={confirm}
+                            disabled={farmVisitedByUser.is_region === 1 ? true:false}
                             id="standard-select-currency2"
                             select
                             label="Select"
@@ -297,16 +310,16 @@ const MonitorRegion = () => {
                     </div>
 
                 <div className="show__restriccion">
-                    {/* <p className="text-danger h4">{takeScreen? 'Tomar Captura': ''}</p> */}
-                    {confirm && 'Tomar captura'}
+                   
+                    <p className="text-danger h4">{confirm? 'Tomar Captura': ''}</p>
                     <h4 className="mb-30">Restricción Actual</h4>
                     <div style={{ textAlign: 'center' }}>
                         <br /><br />
-                        { !loading ? '' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1]}
-                        { !loading ? '' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === 1 ? ' noche' : ' noches'}
-                       {/*  { loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /> } */}
-                        {/* {
-                        !hizoClickSiguiente ? '' : cumpleCuarentena  ?
+                        { loading ? '' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === '-' ? 0 : regiones[ciudad -1].noches[parseInt(ciudad2) - 1]}
+                        { loading ? '' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === 1 ? ' noche' : ' noches'}
+                        { loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /> }
+                        
+                        {farmVisitedByUser.is_region === 0 ?
                             <div>
                             <img className="logo-ojai" src='./assets/success.png' alt="Logo Ojai" />
                             <h6>SI CUMPLE CON CUARENTENA</h6>
@@ -316,14 +329,14 @@ const MonitorRegion = () => {
                              <img className="logo-ojai" src='./assets/danger.png' alt="Logo Ojai" />
                              <h5>NO CUMPLE CON CUARENTENA</h5>
                         </div>
-                        } */}
+                        }
                     </div>
                 </div>
                 
                 <div className="col-lg-12 d-flex justify-content-center">
                     <div className="col-lg-2">
                         
-                        {loading ? <button type="button" onClick={handleClickOpen} className="btn btn-primary">Siguiente</button> : ''}
+                        {farmVisitedByUser.is_region === 1 ? '': loading ? '' :<button type="button" onClick={handleClickOpen} className="btn btn-primary">Siguiente</button>}
 
                         {/* { hizoClickSiguiente ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''} */}
                         {loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={3000}  />}  
@@ -337,5 +350,5 @@ const MonitorRegion = () => {
         </div>
     )
 }
-/* ARREGLAR MONITOREO REGIONES */
+
 export default MonitorRegion

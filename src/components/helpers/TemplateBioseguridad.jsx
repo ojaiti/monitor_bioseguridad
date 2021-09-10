@@ -6,7 +6,7 @@ const TemplateBioseguridad = ({granjas, cantidadDeColumnasYFilas}) => {
     }
     reverseString("hello");
 
-
+    console.log('gRANJAS MONITOREO', granjas)
 
     const GridLabels = styled.div`
         display: grid;
@@ -23,6 +23,41 @@ const TemplateBioseguridad = ({granjas, cantidadDeColumnasYFilas}) => {
         display: grid;
         grid-template-rows: repeat(${cantidadDeColumnasYFilas}, minmax(34px, 1fr));
     `;
+
+
+
+
+    return (
+        <>
+        <h3 align="center">Piramide Bioseguridad</h3>
+        <table>
+            <thead>
+            <tr className="label__main">
+                <th>
+                    <img className="logo-ojai" width="100" src='./assets/monitor__visitas/logoN.png' alt="Logo Ojai" />
+                </th>
+            {granjas.map(item =><th key={item.label}><span className="label__top">{item.label.toUpperCase() }</span></th>)}
+            </tr>
+            </thead>
+            <tbody>
+                {granjas.map(item =>
+                    (<tr key={item.value + 'ezzz' } className="label__main">
+                            <th  data-label={item.label + 'e' } key={item.value + 'ezzz' }><span >{item.label.toUpperCase() }</span></th>
+                        {
+                            item.noches.map((noche, index) => {
+                                return  <td data-label={noche + index} key={noche + index}  className={noche === '-' ? 'label__content dark_night':'label__content'}><div>{noche}</div></td>
+                            })
+                        }
+
+                    </tr>)
+                )}
+            </tbody>
+                     
+            
+            
+        </table>
+        </>
+    )
     return (
         <div>
             {/* <h4> Bios seguridad granjas</h4> */}
@@ -51,7 +86,7 @@ const TemplateBioseguridad = ({granjas, cantidadDeColumnasYFilas}) => {
                      <GridLabels key={item.value} className="label__main">
                         {
                             item.noches.map((noche, index) => {
-                                return  <div key={noche + index}  className="label__content"><div>{noche}</div></div>
+                                return  <div key={noche + index}  className={noche === '-' ? 'label__content dark_night':'label__content'}><div>{noche}</div></div>
                             })
                         
                         }
@@ -70,3 +105,6 @@ const TemplateBioseguridad = ({granjas, cantidadDeColumnasYFilas}) => {
 }
 
 export default TemplateBioseguridad
+
+  
+

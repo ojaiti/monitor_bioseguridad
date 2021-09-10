@@ -9,14 +9,15 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import MenuIcon from '@material-ui/icons/Menu';
 export const Navbar = () => {
-    const ITEM_HEIGHT = 48;
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [isOpen, setIsOpen] = React.useState(true);
     const [openCloseClass, setOpenCloseClass] = React.useState('navbar navbar-expand-sm navbar-dark');
     const open = Boolean(anchorEl);
+    const ITEM_HEIGHT = 48;
 
 
-    const { user:{ name, user_detail }, dispatch } = useContext(AuthContext);
+    const {user, user:{ name, user_detail }, dispatch } = useContext(AuthContext);
+   
     const history = useHistory();
     const handleLogout = () => {
 
@@ -33,7 +34,6 @@ export const Navbar = () => {
     }
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
-        console.log('Helo')
     };
 
     const handleVisitas = () => {
@@ -49,6 +49,7 @@ export const Navbar = () => {
         !isOpen ? setOpenCloseClass('navbar navbar-expand-sm navbar-dark') : setOpenCloseClass('navbar navbar-expand-sm navbar-dark open__close__nav')
         
     }
+    const farms_list = user_detail.visible_farms[0].visible_farms
     return (
         <nav className={openCloseClass}>
 
@@ -65,49 +66,22 @@ export const Navbar = () => {
             <div className="navbar-collapse col-lg-7">
 
                 <div className="navbar-nav">
+                {farms_list.map((farm, index)=>{
+                        const farm_link = `/${farm}`
+                        return <NavLink 
+                                key={index}
+                                activeClassName="active"
+                                className="nav-item nav-link" 
+                                exact
+                                to={farm_link}
+                            >
+                                {farm}
+                            </NavLink>
+                    })}
     
-                    <NavLink 
-                        activeClassName="active"
-                        className="nav-item nav-link" 
-                        exact
-                        to="/noroeste"
-                    >
-                        Noroeste
-                    </NavLink>
-                    <NavLink 
-                        activeClassName="active"
-                        className="nav-item nav-link" 
-                        exact
-                        to="/veracruz"
-                    >
-                        Veracruz
-                    </NavLink>
-                    <NavLink 
-                        activeClassName="active"
-                        className="nav-item nav-link" 
-                        exact
-                        to="/tehuacan"
-                    >
-                        Tehuacan
-                    </NavLink>
-                    <NavLink 
-                        activeClassName="active"
-                        className="nav-item nav-link" 
-                        exact
-                        to="/cordoba"
-                    >
-                        Cordoba
-                    </NavLink>
+                  
                     {/* ------------------------------------------------ */}
-                    
-                    <NavLink 
-                        activeClassName="active"
-                        className="nav-item nav-link" 
-                        exact
-                        to="/regiones"
-                    >
-                        Regiones
-                    </NavLink>
+                   
                     <NavLink 
                         activeClassName="active"
                         className="nav-item nav-link" 
@@ -116,6 +90,8 @@ export const Navbar = () => {
                     >
                         Acciones Preventivas
                     </NavLink>
+
+                    
                     
                         
                     

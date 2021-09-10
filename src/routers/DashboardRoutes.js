@@ -23,7 +23,6 @@ import TablaRegiones from '../components/regiones/TablaRegiones';
 export const DashboardRoutes = () => {
 
     const { user:{user_detail } } = useContext(AuthContext);
-    console.log('user_detail Dashboard', user_detail)
     const reg_id =  user_detail.reg_id
     const regiones = ['noroeste', 'veracruz', 'tehuacan', 'cordoba']
     const region_name = "/" + regiones[reg_id - 1]

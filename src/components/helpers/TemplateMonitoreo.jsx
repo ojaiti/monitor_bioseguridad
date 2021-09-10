@@ -10,12 +10,29 @@ import Regresiva from './Regresiva';
 import lastOneFarmVisitedByUser from './API/lastOneFarmVisitedByUser';
 import RegionNoVisible from './RegionNoVisible';
 
+/* Modal Confiramacion */
+
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Slide from '@material-ui/core/Slide';
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
+
 const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo, nombreTabla }) => {
     const { user:{user_detail }} = useContext(AuthContext);
     const [ciudad, setCiudad] = React.useState(lastFarmVisited.farm_id);
     const [ciudad2, setCiudad2] = React.useState(farmId);
     const [loading, setLoading] = React.useState(false)
     const [takeScreen, setTakeScreen] =  useState(false)
+    const [open, setOpen] = React.useState(false);
+    const [confirm, setConfirm] = React.useState(false);
+
     const [cumpleCuarentena, setCumpleCuarentena] = useState(false)
     const [hizoClickSiguiente, setHizoClickSiguiente] = useState(false)
     const [hizoClickSiguiente2, setHizoClickSiguiente2] = useState(false)
@@ -23,13 +40,24 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
     const [lastDateVisitedFarm, setLastDateVisitedFarm ] = useState(null)
     const [testRederizado, setTestRenderizado] = useState(false)
     /* Tiempo de carga para el loader */
-    const timeLoader = 1000
+    const timeLoader = 1500
     var cuarentena = useRef({'days':0,'hours':0,'minutes':0,'seconds':0})
     
 
     /* Use Callback */
     const callback = useCallback((value) => {
         cuarentena.current = value
+        console.log(value)
+        if(cuarentena.current.days > 0 || cuarentena.current.hours > 0 || cuarentena.current.minutes > 0 || cuarentena.current.seconds > 0){
+            console.log('NO CUMPLE LA CUARENTENA')
+            setCumpleCuarentena(false)
+            setLoading(false)
+        }
+        else{
+            console.log('SI CUMPLE LA CUARENTENA')
+            
+            setCumpleCuarentena(true)
+        }
     }, []);
     /* Esta funcion dispara el Loader */
     const handleLoading = () => {
@@ -57,8 +85,20 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
 
    useEffect(() => {
     lastOneFarmByUser(user_detail.id)
+    handleLoading()
    }, [])
 
+const handleClickOpen = () => {
+        setOpen(true);
+      };
+   const handleClose = () => {
+    setOpen(false);
+    setConfirm(false);
+  };
+  const handleConfirm = () => {
+      setOpen(false);
+      setConfirm(true);
+  }
     /* Function para cambiar a la seccion de BIOSEGURIDAD */
     let history = useHistory();
     const handleClick = () => {
@@ -66,13 +106,32 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
     }
     /* Submit */
     const handleSubmit = (e) => {
+        /* Obtenemos la noche dependiendo de la granja seleccionada */
+        var noches = farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === '-' ? '0' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]
+        /* Obtenemos la fecha actual */
+        const dateNow = new Date()
+        /* Obtenemos la fecha de la ultima granja visitada por usuario */
+        const dateFinal = new Date(lastDateVisitedFarm.frm_visited_date)
+        /* Agregagmos las nocghes correspondientes a la fecha de la ultima granja visitada */
+        const dateWithNights = dateFinal.setDate(dateFinal.getDate() + noches);
+        /* Convertimos la fecha de la ultima granja + noches a tipo Date */
+        const dateObjectWithNights = new Date(dateWithNights)
 
+        /* comprobacion de la ultima granja visitada con la actual */
+
+        if(dateObjectWithNights.getTime() < dateNow.getTime()){
+            var noches = 0;
+        }
+
+        console.log('------ ENTER', noches )
         var url = 'http://127.0.0.1:8000/farm_visited';
         var data = {
             "frm_visited_date": new Date(),
-            "frm_visited_quarantine_nights":farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]],
+            "frm_visited_quarantine_nights": noches,
             "farm_frm_visited_id": ciudad2,
-            "user_frm_visited_id": user_detail.id
+            "user_frm_visited_id": user_detail.id,
+            "frm_visited_is_region": 0
+
         };
 
         fetch(url, {
@@ -117,12 +176,7 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
 /* Cumple o no Con Cuarentena */
     const verificarCuarentena = (event) => {
         setHizoClickSiguiente(true)
-        if(cuarentena.current.days > 0 || cuarentena.current.hours > 0 || cuarentena.current.minutes > 0 || cuarentena.current.seconds > 0){
-            setCumpleCuarentena(false)
-        }
-        else{
-            setCumpleCuarentena(true)
-        }
+        
     }
     const verificarTakeScreen = () => {
         hizoClickSiguiente ? setTakeScreen(true) : setTakeScreen(false)
@@ -131,6 +185,8 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
     if(farms[ciudad]?.frm_restriction[0] === undefined){
         return <RegionNoVisible />
     }
+
+    console.log('Cumple cuarentena', cumpleCuarentena)
     return (
         <div className="main__body">
             {/* Tiempo Restante para tu proxima visita a granja */}
@@ -141,6 +197,36 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
                 lastDateVisitedFarm = {lastDateVisitedFarm}
                 />
             }
+
+
+             {/* Dialog confirmacion */}
+             <div>
+        
+        <Dialog
+          open={open}
+          TransitionComponent={Transition}
+          keepMounted
+          onClose={handleClose}
+          aria-labelledby="alert-dialog-slide-title"
+          aria-describedby="alert-dialog-slide-description"
+        >
+          <DialogTitle id="alert-dialog-slide-title">{"Estas seguro de elegir esta visita?"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-slide-description">
+              Una vez que des click guardar no habra marcha atras hasta que termine la cuarentea.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="secondary">
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirm} color="primary">
+              Aceptar
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+
             <h2 className="text-uppercase">{titulo}</h2>
             
             <h1>Nota: Revisa primero las restricciones existentes de <button className="btn btn-warning" type="button" onClick={handleClick}>BIOSEGURIDAD</button></h1>
@@ -180,7 +266,7 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
                         <h4>Destino</h4>
 
                         <TextField
-                            disabled={false}
+                            disabled={!cumpleCuarentena}
                             id="standard-select-currency2"
                             select
                             label="Select"
@@ -210,11 +296,13 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
                     <h4 className="mb-30">Restricción Actual</h4>
                     <div style={{ textAlign: 'center' }}>
                         <br /><br />
-                        { loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]}
-                        { loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === 1 ? ' noche' : ' noches'}
-                        { loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /* 3 secs */ /> }
+                        {!cumpleCuarentena? '': loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === '00' ? 0 : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]}
+                        {!cumpleCuarentena? '': loading ? '' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === 1 ? ' noche' : ' noches'}
+                        {!cumpleCuarentena? '': loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /* 3 secs */ /> }
                         {
-                        !hizoClickSiguiente ? '' : cumpleCuarentena  ?
+
+
+                        loading ? '': cumpleCuarentena  ?
                             <div>
                             <img className="logo-ojai" src='./assets/success.png' alt="Logo Ojai" />
                             <h6>SI CUMPLE CON CUARENTENA</h6>
@@ -230,12 +318,15 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
                 
                 <div className="col-lg-12 d-flex justify-content-center">
                     <div className="col-lg-2">
-                        {loading ? '' : <button type="button" onClick={verificarCuarentena} className="btn btn-primary">Siguiente</button>}
-                        { hizoClickSiguiente && cumpleCuarentena ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''}
-                        {loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={timeLoader} /* 3 sec */ />}
+                        
+                        {!cumpleCuarentena ? '' :loading ? '': <button type="button" onClick={handleClickOpen} className="btn btn-primary">Siguiente</button>}
+
+                        {/* { hizoClickSiguiente ? <button type="button" onClick={verificarTakeScreen} className="btn btn-primary">Siguiente</button> : ''} */}
+                        {loading && <Loader type="Oval" color="#00BFFF" height={30} width={30} timeout={3000}  />}  
                     </div>
                     <div className="col-lg-2">
-                        { hizoClickSiguiente2 ? takeScreen ? cumpleCuarentena ? <button type="submit" onClick={()=>{return true}} className="btn btn-primary">Guardar</button> : '' : '' : ''}
+                        {/* { hizoClickSiguiente2 ? takeScreen ? cumpleCuarentena ? <button type="submit" onClick={()=>{return true}} className="btn btn-primary">Guardar</button> : '' : '' : ''} */}
+                        {!cumpleCuarentena ? '' :!confirm ? '': <button type="submit"  className="btn btn-primary">Guardar</button> } 
                     </div>
                 </div>
             </form>

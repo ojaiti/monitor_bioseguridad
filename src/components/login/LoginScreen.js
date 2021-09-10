@@ -29,113 +29,99 @@ export const LoginScreen = () => {
   
     
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
+      e.preventDefault()
       
-    e.preventDefault()
-
-      if(username !== '' || password !== ''){
-
-     
-      const response = await fetch("http://127.0.0.1:8000/token", {
+      
+      if(username !== '' && password !== ''){
         
-        /* Aqui se trabaja el login */
-        body: `grant_type=&username=${username}&password=${password}&scope=&client_id=&client_secret=`,
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        method: "POST"
-      })
-      
-    const tokenResponse = await response.json()
-    
-
-    if(tokenResponse.hasOwnProperty("access_token")){
-     
-      //Get User details
-     fetch("http://127.0.0.1:8000/users/me/", {
-            
-        /* Aqui se obtiene la request a la info del usuario */
-        headers: {
-          Accept: "application/json",
-          "Authorization": 'Bearer '+tokenResponse.access_token
-        },
-        method: "GET"
-      })
-      .then(function(response){
-        return response.json();
-      })
-      .then(function(json) {
-        fetch("http://127.0.0.1:8000/last_farm_visited_by_user/"+json.id)
-        .then(function(response) {
-          return response.json();
+        const response = await fetch("http://127.0.0.1:8000/token", {
+          /* Aqui se trabaja el login */
+          body: `grant_type=&username=${username}&password=${password}&scope=&client_id=&client_secret=`,
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          method: "POST"
         })
-        .then(function(json2){
-          fetch("http://127.0.0.1:8000/farms/"+json2[0].FarmsVisited.farm_frm_visited_id)
-          .then(function(response) {
+      
+        const tokenResponse = await response.json()
+        /* vERIFICAMOS QUE EXISTA UN TOKEN */
+
+        if(tokenResponse.hasOwnProperty("access_token")){
+          //Get User details
+          fetch("http://127.0.0.1:8000/users/me/", {
+                
+            /* Aqui se obtiene la request a la info del usuario */
+            headers: {
+              Accept: "application/json",
+              "Authorization": 'Bearer '+tokenResponse.access_token
+            },
+            method: "GET"
+          })
+          .then(function(response){
             return response.json();
           })
-          .then(function(json3){
-            console.log('json 1.1.1.1.',json)
-            console.log('json 22.2.2.2',json2)
-            console.log('json 3.3,.3.3.3',json3)
-            const user_detail = {
-              "id":json.id,
-              "username": json.username,
-              "nombre": json.nombre,
-              "apellidos": json.apellidos,
-              "frm_name" : json2[0].Farm.frm_name,
-              "frm_visited_date": json2[0].FarmsVisited.frm_visited_date,
-              "farm_frm_visited_id": json2[0].FarmsVisited.farm_frm_visited_id,
-              "quarentine_nights": json2[0].FarmsVisited.frm_visited_quarantine_nights,
-              "reg_id" : json3.region_frm_id
-            }
-
-            dispatch({
-              type: types.login,
-              payload:{
-                name:username,
-                token:tokenResponse.access_token,
-                user_detail: user_detail
+          .then(function(json) {
+            fetch("http://127.0.0.1:8000/last_farm_visited_by_user/"+json.id)
+            .then(function(response) {
+              return response.json();
+            })
+            .then(function(json2){
+              fetch("http://127.0.0.1:8000/farms/"+json2[0].FarmsVisited.farm_frm_visited_id)
+              .then(function(response) {
+                return response.json();
+              })
+              
+              .then(function(json3){
+                const user_detail = {
+                  "id":json.id,
+                  "username": json.username,
+                  "nombre": json.nombre,
+                  "apellidos": json.apellidos,
+                  "frm_name" : json2[0].Farm.frm_name,
+                  "frm_visited_date": json2[0].FarmsVisited.frm_visited_date,
+                  "farm_frm_visited_id": json2[0].FarmsVisited.farm_frm_visited_id,
+                  "quarentine_nights": json2[0].FarmsVisited.frm_visited_quarantine_nights,
+                  "reg_id" : json3.region_frm_id,
+                  "visible_farms":json.visible_farms
                 }
+              /*   console.log('jason',json)
+                console.log('jason2',json2)
+                console.log('jason3',json3) */
+                dispatch({
+                    type: types.login,
+                    payload:{
+                      name:username,
+                      token:tokenResponse.access_token,
+                      user_detail: user_detail
+                    }
+                })
               })
             })
-
-
-        })
-      });
+          });
 
       /* const userResponse = await getUserMe.json() */
 
       
       
+        }else{
+          setErrorMessage({
+              isError : true,
+              showError : tokenResponse.detail
+            })
+        }
     }else{
-      
-      setErrorMessage({
-          isError : true,
-          showError : tokenResponse.detail
-        })
-    }
-  }else{
 
-    setErrorMessage(
-      {
-        isError : true,
-        showError : 'Escribe tus credenciales'
-      }
-    )
-    
-  }
-      /*     dispatch({
-            type: types.login,
-            payload:{
-              name:username,
-            }
-          }) */
-       
-            
-         
+      setErrorMessage(
+        {
+          isError : true,
+          showError : 'Escribe tus credenciales'
+        }
+      )
+      
     }
+  }
     return (
         <div className="container__login">
             <div className="card__form">
