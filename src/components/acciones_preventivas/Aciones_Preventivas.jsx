@@ -7,6 +7,7 @@ const Aciones_Preventivas = () => {
             <h4 className="text-center pb-5">ACCIONES PREVIAS Y POSTERIOR A INGRESO A GRANJAS NO LIBRES</h4>
             <div className="col-lg-12 d-flex justify-content-center">
                 <div>
+                
                 <p className="text-justify">*Cuarentena de unidades y personal posterior al ingreso de estas granjas será de <b>4 noches.</b></p>
                 <p className="text-justify">*Lavado y desinfección de unidades posterior al ingreso de esta granja (evidenciar con ticket de lavado y desinfección).</p>
                 <p className="text-justify">*Queda prohibido el ingreso a granjas a visitantes técnicos-comerciales o proveedores externos a OJAI en todos los flujos </p>

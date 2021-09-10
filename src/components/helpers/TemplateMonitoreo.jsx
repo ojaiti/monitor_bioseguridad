@@ -124,7 +124,7 @@ const handleClickOpen = () => {
         }
 
         console.log('------ ENTER', noches )
-        var url = 'http://127.0.0.1:8000/farm_visited';
+        var url = `${process.env.REACT_APP_API_PRODUCTION}farm_visited`;
         var data = {
             "frm_visited_date": new Date(),
             "frm_visited_quarantine_nights": noches,
@@ -144,7 +144,7 @@ const handleClickOpen = () => {
         .catch(error => console.error('Error:', error))
         .then(response => {
             setCiudad(ciudad2)
-            fetch("http://127.0.0.1:8000/details_visited/"+response.user_frm_visited_id)
+            fetch(`${process.env.REACT_APP_API_PRODUCTION}details_visited/`+response.user_frm_visited_id)
             .then(function(response) {
                 return response.json();
             })

@@ -127,7 +127,7 @@ const MonitorRegion = () => {
 
     const handleSubmit = (e) => {
         const noches = regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === '-' ? 0 : regiones[ciudad -1].noches[parseInt(ciudad2) - 1]
-        var url = 'http://127.0.0.1:8000/farm_visited';
+        var url = `${process.env.REACT_APP_API_PRODUCTION}`;
         var data = {
             "frm_visited_date": new Date(),
             "frm_visited_quarantine_nights":noches,
@@ -146,7 +146,7 @@ const MonitorRegion = () => {
         .catch(error => console.error('Error:', error))
         .then(response => {
             setCiudad(ciudad2)
-            fetch("http://127.0.0.1:8000/details_visited/"+response.user_frm_visited_id)
+            fetch(`${process.env.REACT_APP_API_PRODUCTION}details_visited/`+response.user_frm_visited_id)
             .then(function(response) {
                 return response.json();
             })

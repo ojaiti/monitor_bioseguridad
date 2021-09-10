@@ -35,7 +35,7 @@ export const LoginScreen = () => {
       
       if(username !== '' && password !== ''){
         
-        const response = await fetch("http://127.0.0.1:8000/token", {
+        const response = await fetch(`${process.env.REACT_APP_API_PRODUCTION}token`, {
           /* Aqui se trabaja el login */
           body: `grant_type=&username=${username}&password=${password}&scope=&client_id=&client_secret=`,
           headers: {
@@ -50,7 +50,7 @@ export const LoginScreen = () => {
 
         if(tokenResponse.hasOwnProperty("access_token")){
           //Get User details
-          fetch("http://127.0.0.1:8000/users/me/", {
+          fetch(`${process.env.REACT_APP_API_PRODUCTION}`, {
                 
             /* Aqui se obtiene la request a la info del usuario */
             headers: {
@@ -63,12 +63,12 @@ export const LoginScreen = () => {
             return response.json();
           })
           .then(function(json) {
-            fetch("http://127.0.0.1:8000/last_farm_visited_by_user/"+json.id)
+            fetch(`${process.env.REACT_APP_API_PRODUCTION}last_farm_visited_by_user/`+json.id)
             .then(function(response) {
               return response.json();
             })
             .then(function(json2){
-              fetch("http://127.0.0.1:8000/farms/"+json2[0].FarmsVisited.farm_frm_visited_id)
+              fetch(`${process.env.REACT_APP_API_PRODUCTION}`+json2[0].FarmsVisited.farm_frm_visited_id)
               .then(function(response) {
                 return response.json();
               })
