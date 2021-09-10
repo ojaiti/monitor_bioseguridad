@@ -68,7 +68,7 @@ export const LoginScreen = () => {
               return response.json();
             })
             .then(function(json2){
-              fetch(`${process.env.REACT_APP_API_PRODUCTION}`+json2[0].FarmsVisited.farm_frm_visited_id)
+              fetch(`${process.env.REACT_APP_API_PRODUCTION}farms/`+json2[0].FarmsVisited.farm_frm_visited_id)
               .then(function(response) {
                 return response.json();
               })
