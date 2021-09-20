@@ -49,13 +49,10 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
         cuarentena.current = value
         console.log(value)
         if(cuarentena.current.days > 0 || cuarentena.current.hours > 0 || cuarentena.current.minutes > 0 || cuarentena.current.seconds > 0){
-            console.log('NO CUMPLE LA CUARENTENA')
             setCumpleCuarentena(false)
             setLoading(false)
         }
         else{
-            console.log('SI CUMPLE LA CUARENTENA')
-            
             setCumpleCuarentena(true)
         }
     }, []);
@@ -105,6 +102,10 @@ const handleClickOpen = () => {
         history.push("/" + nombreTabla);
     }
     /* Submit */
+    function sumarDias(fecha, dias){
+        fecha.setDate(fecha.getDate() + dias);
+        return fecha;
+      }
     const handleSubmit = (e) => {
         /* Obtenemos la noche dependiendo de la granja seleccionada */
         var noches = farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === '-' ? '0' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]
@@ -112,18 +113,19 @@ const handleClickOpen = () => {
         const dateNow = new Date()
         /* Obtenemos la fecha de la ultima granja visitada por usuario */
         const dateFinal = new Date(lastDateVisitedFarm.frm_visited_date)
+        console.log(noches)
+        console.log('dateNow: ',dateNow )
+        console.log('dateFinal: ', dateFinal)
         /* Agregagmos las nocghes correspondientes a la fecha de la ultima granja visitada */
-        const dateWithNights = dateFinal.setDate(dateFinal.getDate() + noches);
+        const dateWithNights = sumarDias(dateFinal, parseInt(noches));
         /* Convertimos la fecha de la ultima granja + noches a tipo Date */
-        const dateObjectWithNights = new Date(dateWithNights)
+        console.log('dateWithNights: ', dateWithNights)
 
         /* comprobacion de la ultima granja visitada con la actual */
-
-        if(dateObjectWithNights.getTime() < dateNow.getTime()){
+        if(dateWithNights.getTime() < dateNow.getTime()){
             var noches = 0;
         }
-
-        console.log('------ ENTER', noches )
+        
         var url = `${process.env.REACT_APP_API_PRODUCTION}farm_visited`;
         var data = {
             "frm_visited_date": new Date(),
@@ -135,8 +137,8 @@ const handleClickOpen = () => {
         };
 
         fetch(url, {
-        method: 'POST', // or 'PUT'
-        body: JSON.stringify(data), // data can be `string` or {object}!
+        method: 'POST', 
+        body: JSON.stringify(data), 
         headers:{
             'Content-Type': 'application/json'
         }
@@ -186,7 +188,6 @@ const handleClickOpen = () => {
         return <RegionNoVisible />
     }
 
-    console.log('Cumple cuarentena', cumpleCuarentena)
     return (
         <div className="main__body">
             {/* Tiempo Restante para tu proxima visita a granja */}
@@ -213,7 +214,7 @@ const handleClickOpen = () => {
           <DialogTitle id="alert-dialog-slide-title">{"Estas seguro de elegir esta visita?"}</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-slide-description">
-              Una vez que des click guardar no habra marcha atras hasta que termine la cuarentea.
+              Una vez que des click guardar no habra marcha atras hasta que termine la cuarentena.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

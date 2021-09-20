@@ -47,8 +47,6 @@ const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
       parentCallback(mostrarDate)
       const dateToday = new Date()
 
-      console.log('Fecha final', end)
-      console.log('Fecha de hoy', dateToday)
         if(end.getTime() < dateToday.getTime()){
           console.log('GHeklo')
         }else{

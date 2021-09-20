@@ -37,6 +37,7 @@ export const LoginScreen = () => {
         
         const response = await fetch(`${process.env.REACT_APP_API_PRODUCTION}token`, {
           /* Aqui se trabaja el login */
+          mode: 'cors',
           body: `grant_type=&username=${username}&password=${password}&scope=&client_id=&client_secret=`,
           headers: {
             Accept: "application/json",
