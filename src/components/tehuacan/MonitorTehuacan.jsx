@@ -32,6 +32,8 @@ const MonitorTehuacan = () => {
                extract[farm.frm_id] = farm
                nochesWithFarmId[farm.frm_id] = count
                count++;
+                return 1
+
             })
             setNochesFarmId(nochesWithFarmId)
             setFarms(extract)

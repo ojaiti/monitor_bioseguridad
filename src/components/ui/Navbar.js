@@ -16,7 +16,7 @@ export const Navbar = () => {
     const ITEM_HEIGHT = 48;
 
 
-    const {user, user:{ name, user_detail }, dispatch } = useContext(AuthContext);
+    const {user:{ name, user_detail }, dispatch } = useContext(AuthContext);
    
     const history = useHistory();
     const handleLogout = () => {
@@ -49,6 +49,7 @@ export const Navbar = () => {
         !isOpen ? setOpenCloseClass('navbar navbar-expand-sm navbar-dark') : setOpenCloseClass('navbar navbar-expand-sm navbar-dark open__close__nav')
         
     }
+    console.log('Famrs_List', user_detail)
     const farms_list = user_detail.visible_farms[0].visible_farms
     return (
         <nav className={openCloseClass}>

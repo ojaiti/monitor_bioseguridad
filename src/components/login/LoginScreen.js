@@ -41,7 +41,8 @@ export const LoginScreen = () => {
           body: `grant_type=&username=${username}&password=${password}&scope=&client_id=&client_secret=`,
           headers: {
             Accept: "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
+            'Access-Control-Allow-Origin': '*',
           },
           method: "POST"
         })
@@ -56,7 +57,8 @@ export const LoginScreen = () => {
             /* Aqui se obtiene la request a la info del usuario */
             headers: {
               Accept: "application/json",
-              "Authorization": 'Bearer '+tokenResponse.access_token
+              "Authorization": 'Bearer '+tokenResponse.access_token,
+               
             },
             method: "GET"
           })

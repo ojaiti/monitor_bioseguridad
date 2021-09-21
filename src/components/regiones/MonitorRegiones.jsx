@@ -29,12 +29,8 @@ const MonitorRegion = () => {
     const [ciudad2, setCiudad2] = React.useState('1');
     const [ciudad3, setCiudad3] = React.useState('1');
     const [farms, setFarms] = useState(null)
-    const [hizoClickSiguiente, setHizoClickSiguiente] = useState(false)
-    const [cumpleCuarentena, setCumpleCuarentena] = useState(false)
     const [loading, setLoading] = React.useState(true)
-    const [farmId, setFarmId]  = useState(1)
     const [farmVisitedByUser, setfarmVisitedByUser] = useState(null)
-    const [nochesFarmId, setNochesFarmId] = useState(null)
     const [open, setOpen] = React.useState(false);
     const [confirm, setConfirm] = React.useState(false);
 
@@ -70,7 +66,7 @@ const MonitorRegion = () => {
         farmsByRegion(parseInt(ciudad2))
         lastOneFarmByUser(user_detail.id)
         handleLoading()
-    },[ciudad2])
+    },[ciudad2, user_detail.id])
 
     const farmsByRegion = (region) => {
         var extract = [] /* Array para cambiar el id de las granjas por el frm_id */
@@ -85,7 +81,10 @@ const MonitorRegion = () => {
                extract[farm.frm_id] = farm
                nochesWithFarmId[farm.frm_id] = count
                count++;
+               return 1
             })
+
+            
             setCiudad3(data[0].frm_id)
             setFarms(extract)
             

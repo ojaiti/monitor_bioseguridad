@@ -29,13 +29,12 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
     const [ciudad, setCiudad] = React.useState(lastFarmVisited.farm_id);
     const [ciudad2, setCiudad2] = React.useState(farmId);
     const [loading, setLoading] = React.useState(false)
-    const [takeScreen, setTakeScreen] =  useState(false)
+    /* const [takeScreen, setTakeScreen] =  useState(false) */
     const [open, setOpen] = React.useState(false);
     const [confirm, setConfirm] = React.useState(false);
 
     const [cumpleCuarentena, setCumpleCuarentena] = useState(false)
-    const [hizoClickSiguiente, setHizoClickSiguiente] = useState(false)
-    const [hizoClickSiguiente2, setHizoClickSiguiente2] = useState(false)
+  
     /* Envio de ultima fecha de la granja visitada mas noches */
     const [lastDateVisitedFarm, setLastDateVisitedFarm ] = useState(null)
     const [testRederizado, setTestRenderizado] = useState(false)
@@ -83,7 +82,7 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
    useEffect(() => {
     lastOneFarmByUser(user_detail.id)
     handleLoading()
-   }, [])
+   }, [user_detail.id])
 
 const handleClickOpen = () => {
         setOpen(true);
@@ -108,28 +107,28 @@ const handleClickOpen = () => {
       }
     const handleSubmit = (e) => {
         /* Obtenemos la noche dependiendo de la granja seleccionada */
-        var noches = farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === '-' ? '0' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]
+        var nochesCount = farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === '-' ? '0' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]
         /* Obtenemos la fecha actual */
         const dateNow = new Date()
         /* Obtenemos la fecha de la ultima granja visitada por usuario */
         const dateFinal = new Date(lastDateVisitedFarm.frm_visited_date)
-        console.log(noches)
+        console.log(nochesCount)
         console.log('dateNow: ',dateNow )
         console.log('dateFinal: ', dateFinal)
         /* Agregagmos las nocghes correspondientes a la fecha de la ultima granja visitada */
-        const dateWithNights = sumarDias(dateFinal, parseInt(noches));
+        const dateWithNights = sumarDias(dateFinal, parseInt(nochesCount));
         /* Convertimos la fecha de la ultima granja + noches a tipo Date */
         console.log('dateWithNights: ', dateWithNights)
 
         /* comprobacion de la ultima granja visitada con la actual */
         if(dateWithNights.getTime() < dateNow.getTime()){
-            var noches = 0;
+            nochesCount = 0;
         }
         
         var url = `${process.env.REACT_APP_API_PRODUCTION}farm_visited`;
         var data = {
             "frm_visited_date": new Date(),
-            "frm_visited_quarantine_nights": noches,
+            "frm_visited_quarantine_nights": nochesCount,
             "farm_frm_visited_id": ciudad2,
             "user_frm_visited_id": user_detail.id,
             "frm_visited_is_region": 0
@@ -170,20 +169,12 @@ const handleClickOpen = () => {
     
     const handleChange2 = (event) => {
         event.preventDefault()
-        setHizoClickSiguiente(false)
-        setHizoClickSiguiente2(false)
         setCiudad2(event.target.value);
         handleLoading()
     };
 /* Cumple o no Con Cuarentena */
-    const verificarCuarentena = (event) => {
-        setHizoClickSiguiente(true)
-        
-    }
-    const verificarTakeScreen = () => {
-        hizoClickSiguiente ? setTakeScreen(true) : setTakeScreen(false)
-        setHizoClickSiguiente2(true)
-    }
+   
+    
     if(farms[ciudad]?.frm_restriction[0] === undefined){
         return <RegionNoVisible />
     }
@@ -293,7 +284,7 @@ const handleClickOpen = () => {
                 </div>
 
                 <div className="show__restriccion">
-                    <p className="text-danger h4">{takeScreen? 'Tomar Captura': ''}</p>
+                    {/* <p className="text-danger h4">{takeScreen? 'Tomar Captura': ''}</p> */}
                     <h4 className="mb-30">Restricción Actual</h4>
                     <div style={{ textAlign: 'center' }}>
                         <br /><br />

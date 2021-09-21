@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useContext } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import 'moment-timezone';
 const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
 
@@ -41,7 +41,7 @@ const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
 
 
     
-
+/* Quitaer 'end', 'mostrarDate', and 'parentCallback' */
 
     useEffect(() => {
       parentCallback(mostrarDate)
@@ -57,7 +57,7 @@ const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
           };
         }
         
-      }, [lastDateVisitedFarm, decreaseDate]);
+      });
       
     
     return (
