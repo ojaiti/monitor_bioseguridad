@@ -1,29 +1,19 @@
 import React, { useContext } from 'react'
 import { AuthContext } from '../../auth/AuthContext';
-import lastFarmsVisitedByUser from '../helpers/API/lastFarmsVisitedByUser';
+import { useFecth } from '../../hooks/useFetch';
 
 
 const Last_farms_visited = () => {
     const { user:{user_detail } } = useContext(AuthContext);
-    const [farms, setFarms] = React.useState(null);
+
+    const {data, loading} = useFecth(`${process.env.REACT_APP_API_PRODUCTION}last_farms_visited_by_user/${user_detail.id}`)
+    console.log('Data', data)
+    console.log('Loading', loading)
+
     
-    React.useEffect(() => {
-        const controller_signal = new AbortController();
-        farmsVisited(user_detail.id, controller_signal)
-        return () => controller_signal.abort()
-        
-      }, [user_detail.id]);
-
-      const farmsVisited = (user_id, controller_signal) => {
-        
-        lastFarmsVisitedByUser(user_id, controller_signal)
-        .then((data) => {
-            setFarms(data)
-        })
-      }
-
-      
-      if (!farms) return null;
+    if(loading) {
+        return 'Loading ...'
+    }
 
     return (
         <div className="container mt-5">
@@ -42,7 +32,7 @@ const Last_farms_visited = () => {
 
     
             {
-                farms.map((response, value) => {
+                data.map((response, value) => {
                     return(
                         <tr key={value}>
                             <td>{value +1}</td>
@@ -60,5 +50,6 @@ const Last_farms_visited = () => {
         </div>
     )
 }
+
 
 export default Last_farms_visited

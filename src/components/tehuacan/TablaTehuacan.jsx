@@ -5,7 +5,7 @@ import TemplateBioseguridad from '../helpers/TemplateBioseguridad'
 const TablaTehuacan = () => {
     return (
         <div>
-            <TemplateBioseguridad granjas={tehuacan} cantidadDeColumnasYFilas={16}  />
+            <TemplateBioseguridad granjas={tehuacan} name={'tehuacan'}  />
         </div>
     )
 }

@@ -9,7 +9,7 @@ import { AuthContext } from '../../auth/AuthContext';
 import Regresiva from './Regresiva';
 import lastOneFarmVisitedByUser from './API/lastOneFarmVisitedByUser';
 import RegionNoVisible from './RegionNoVisible';
-
+/* import { useFecth } from '../../hooks/useFetch'; */
 /* Modal Confiramacion */
 
 import Button from '@material-ui/core/Button';
@@ -62,7 +62,7 @@ const TemplateMonitoreo = ({farms, nochesFarmId, lastFarmVisited, farmId, titulo
             setLoading(false)
         }, timeLoader)
     }
-
+    
 
     const lastOneFarmByUser = (user_id) => {
         lastOneFarmVisitedByUser(user_id)
@@ -100,32 +100,28 @@ const handleClickOpen = () => {
     const handleClick = () => {
         history.push("/" + nombreTabla);
     }
-    /* Submit */
+   
     function sumarDias(fecha, dias){
         fecha.setDate(fecha.getDate() + dias);
         return fecha;
-      }
+      } 
+      /* Submit */
     const handleSubmit = (e) => {
         /* Obtenemos la noche dependiendo de la granja seleccionada */
-        var nochesCount = farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === '-' ? '0' : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]
+        var nochesCount = farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]] === '-' ? 0 : farms[ciudad].frm_restriction[0].noches[nochesFarmId[ciudad2]]
         /* Obtenemos la fecha actual */
         const dateNow = new Date()
         /* Obtenemos la fecha de la ultima granja visitada por usuario */
         const dateFinal = new Date(lastDateVisitedFarm.frm_visited_date)
-        console.log(nochesCount)
-        console.log('dateNow: ',dateNow )
-        console.log('dateFinal: ', dateFinal)
         /* Agregagmos las nocghes correspondientes a la fecha de la ultima granja visitada */
         const dateWithNights = sumarDias(dateFinal, parseInt(nochesCount));
         /* Convertimos la fecha de la ultima granja + noches a tipo Date */
         console.log('dateWithNights: ', dateWithNights)
 
-        /* comprobacion de la ultima granja visitada con la actual */
+        /* comprobacion de fechas de la ultima granja visitada con la fecha actual */
         if(dateWithNights.getTime() < dateNow.getTime()){
             nochesCount = 0;
-        }
-        
-        var url = `${process.env.REACT_APP_API_PRODUCTION}farm_visited`;
+            var url = `${process.env.REACT_APP_API_PRODUCTION}farm_visited`;
         var data = {
             "frm_visited_date": new Date(),
             "frm_visited_quarantine_nights": nochesCount,
@@ -145,6 +141,7 @@ const handleClickOpen = () => {
         .catch(error => console.error('Error:', error))
         .then(response => {
             setCiudad(ciudad2)
+            
             fetch(`${process.env.REACT_APP_API_PRODUCTION}details_visited/`+response.user_frm_visited_id)
             .then(function(response) {
                 return response.json();
@@ -161,6 +158,10 @@ const handleClickOpen = () => {
                 setLastDateVisitedFarm(user_detail2)
             })
         });
+        }else{
+            //No cumple cuarentena
+            setCumpleCuarentena(false)
+        }
 
         /* Actualizar la cuenta regresiva */
         
@@ -178,19 +179,16 @@ const handleClickOpen = () => {
     if(farms[ciudad]?.frm_restriction[0] === undefined){
         return <RegionNoVisible />
     }
-
     return (
         <div className="main__body">
             {/* Tiempo Restante para tu proxima visita a granja */}
             
-            {!testRederizado ? '' :
-                <Regresiva 
-                parentCallback={callback}
-                lastDateVisitedFarm = {lastDateVisitedFarm}
-                />
-            }
-
-
+                {!testRederizado ? '' :
+                    <Regresiva 
+                    parentCallback={callback}
+                    lastDateVisitedFarm = {lastDateVisitedFarm}
+                    />
+                }
              {/* Dialog confirmacion */}
              <div>
         

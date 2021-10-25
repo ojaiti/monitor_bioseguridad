@@ -17,7 +17,6 @@ export const Navbar = () => {
 
 
     const {user:{ name, user_detail }, dispatch } = useContext(AuthContext);
-   
     const history = useHistory();
     const handleLogout = () => {
 
@@ -76,7 +75,7 @@ export const Navbar = () => {
                                 exact
                                 to={farm_link}
                             >
-                                {farm}
+                                {farm.toUpperCase()}
                             </NavLink>
                     })}
     
@@ -89,12 +88,9 @@ export const Navbar = () => {
                         exact
                         to="/acciones_preventivas"
                     >
-                        Acciones Preventivas
+                        ACCIONES  PREVENTIVAS
                     </NavLink>
 
-                    
-                    
-                        
                     
                 </div>
             </div>

@@ -124,20 +124,38 @@ const MonitorRegion = () => {
         cuarentena.current = value
     }, []);
 
+    function sumarDias(fecha, dias){
+        fecha.setDate(fecha.getDate() + dias);
+        return fecha;
+      } 
+/* Validar las noches para ver si puede o no pasar */
     const handleSubmit = (e) => {
-        const noches = regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === '-' ? 0 : regiones[ciudad -1].noches[parseInt(ciudad2) - 1]
-        var url = `${process.env.REACT_APP_API_PRODUCTION}`;
-        var data = {
-            "frm_visited_date": new Date(),
-            "frm_visited_quarantine_nights":noches,
-            "farm_frm_visited_id": ciudad3,
-            "user_frm_visited_id": user_detail.id,
-            "frm_visited_is_region": 1
-        };
+        var nochesCount = regiones[ciudad -1].noches[parseInt(ciudad2) - 1] === '-' ? '0' : regiones[ciudad -1].noches[parseInt(ciudad2) - 1]
+        /* Obtenemos la fecha actual */
+        const dateNow = new Date()
+        /* Obtenemos la fecha de la ultima granja visitada por usuario */
+        const dateFinal = new Date(farmVisitedByUser.frm_visited_date)
+        /* Agregagmos las nocghes correspondientes a la fecha de la ultima granja visitada */
+        const dateWithNights = sumarDias(dateFinal, parseInt(nochesCount));
+        
+        
+        if(dateWithNights.getTime() < dateNow.getTime()){
+            nochesCount = 0;
+            console.log('Noches Regiones: ', nochesCount)
+            var url = `${process.env.REACT_APP_API_PRODUCTION}farm_visited/`;
+            var data = {
+                "frm_visited_date": new Date(),
+                "frm_visited_quarantine_nights":nochesCount,
+                "farm_frm_visited_id": ciudad3,
+                "user_frm_visited_id": user_detail.id,
+                "frm_visited_is_region": 0
+            };
+        }
 
+        console.log("Noches Count: ", nochesCount)
         fetch(url, {
-        method: 'POST', // or 'PUT'
-        body: JSON.stringify(data), // data can be `string` or {object}!
+        method: 'POST', 
+        body: JSON.stringify(data), 
         headers:{
             'Content-Type': 'application/json'
         }
@@ -145,11 +163,13 @@ const MonitorRegion = () => {
         .catch(error => console.error('Error:', error))
         .then(response => {
             setCiudad(ciudad2)
+            console.log('res: 1', response)
             fetch(`${process.env.REACT_APP_API_PRODUCTION}details_visited/`+response.user_frm_visited_id)
             .then(function(response) {
                 return response.json();
             })
             .then(function(res){
+                console.log('resp_ regiones: ',res)
                 const user_detail2 = {
                     farm_frm_visited_id : res.FarmsVisited.frm_visited_id,
                     frm_name : res.Farm.frm_name,

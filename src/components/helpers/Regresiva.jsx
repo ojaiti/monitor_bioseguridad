@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import 'moment-timezone';
+
+/* Este componente crea un timer en decremento una vez que se realiza una visita a granja */
 const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
 
   const [mostrarDate, setMostrarDate] = useState({'days':0,'hours':0,'minutes':0,'seconds':0})
@@ -34,9 +36,7 @@ const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
         clearInterval(intervalRef.current);
       }else{
         setMostrarDate({'days':days,'hours':hours,'minutes':minutes,'seconds':seconds})
-        
       }
-      
     };
 
 
@@ -46,7 +46,8 @@ const Regresiva = ({parentCallback, lastDateVisitedFarm}) => {
     useEffect(() => {
       parentCallback(mostrarDate)
       const dateToday = new Date()
-
+        console.log(end)
+        console.log(dateToday)
         if(end.getTime() < dateToday.getTime()){
           console.log('GHeklo')
         }else{

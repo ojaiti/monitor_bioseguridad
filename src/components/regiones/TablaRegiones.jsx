@@ -6,7 +6,7 @@ const TablaRegiones = () => {
     return (
         <div>
              <div>
-            <TemplateBioseguridad granjas={regiones} cantidadDeColumnasYFilas={4} />
+            <TemplateBioseguridad granjas={regiones} name={'regiones'} />
         </div>
         </div>
     )

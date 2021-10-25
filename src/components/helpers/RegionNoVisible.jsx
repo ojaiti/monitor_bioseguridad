@@ -4,7 +4,7 @@ const RegionNoVisible = () => {
     return (
         <div className="region__no__visible">
 
-            Aun no puedes ver esta region
+            No puedes ver esta region
         </div>
     )
 }

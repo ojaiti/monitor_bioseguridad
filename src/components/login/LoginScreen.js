@@ -89,7 +89,7 @@ export const LoginScreen = () => {
                   "reg_id" : json3.region_frm_id,
                   "visible_farms":json.visible_farms
                 }
-              /*   console.log('jason',json)
+              /*console.log('jason',json)
                 console.log('jason2',json2)
                 console.log('jason3',json3) */
                 dispatch({
