@@ -17,21 +17,22 @@ import TablaCordoba from '../components/cordoba/TablaCordoba';
 import Aciones_Preventivas from '../components/acciones_preventivas/Aciones_Preventivas';
 import Regiones from '../components/regiones/MonitorRegiones';
 import Last_farms_visited from '../components/last_farms_visited_by_user/Last_farms_visited';
-import { AuthContext } from '../auth/AuthContext';
+/* import { AuthContext } from '../auth/AuthContext'; */
 import TablaRegiones from '../components/regiones/TablaRegiones';
+import Bienvenida from '../components/Bienvenida';
 
 export const DashboardRoutes = () => {
 
-    const { user:{user_detail } } = useContext(AuthContext);
-    const reg_id =  user_detail.reg_id
-    const regiones = ['noroeste', 'veracruz', 'tehuacan', 'cordoba']
-    const region_name = "/" + regiones[reg_id - 1]
+    /* const reg_id =  user_detail.reg_id */
+    /* const regiones = ['noroeste', 'veracruz', 'tehuacan', 'cordoba'] */
+    /* const region_name = "/" + regiones[reg_id - 1] */
     return (
         <>
             <Navbar />
 
             <div>
                 <Switch>
+                    <Route exact path="/bienvenida" component={ Bienvenida } />
                     <Route exact path="/noroeste" component={ MonitorNoroeste } />
                     <Route exact path="/tablanoroeste" component={ TablaNoroeste } />
                     <Route exact path="/veracruz" component={ MonitorVeracruz } />
@@ -49,7 +50,7 @@ export const DashboardRoutes = () => {
                     <Route exact path="/dc" component={ DcScreen } />
                     <Route exact path="/search" component={ SearchScreen } /> */}
 
-                    <Redirect to={region_name} /> {/* Ultima granja visitada */}
+                    {/* <Redirect to={region_name} /> */} {/* Ultima granja visitada */}
                 </Switch>
             </div>
 

@@ -16,7 +16,7 @@ export const Navbar = () => {
     const ITEM_HEIGHT = 48;
 
 
-    const {user:{ name, user_detail }, dispatch } = useContext(AuthContext);
+    const {user:{ name }, dispatch } = useContext(AuthContext);
     const history = useHistory();
     const handleLogout = () => {
 
@@ -36,7 +36,7 @@ export const Navbar = () => {
     };
 
     const handleVisitas = () => {
-        history.push("/visitas");
+        history.push("/");
     }   
 
     const handleClose = () => {
@@ -48,8 +48,8 @@ export const Navbar = () => {
         !isOpen ? setOpenCloseClass('navbar navbar-expand-sm navbar-dark') : setOpenCloseClass('navbar navbar-expand-sm navbar-dark open__close__nav')
         
     }
-    console.log('Famrs_List', user_detail)
-    const farms_list = user_detail.visible_farms[0].visible_farms
+    /* console.log('Famrs_List', user_detail) */
+    /* const farms_list = user_detail.visible_farms[0].visible_farms */
     return (
         <nav className={openCloseClass}>
 
@@ -66,7 +66,7 @@ export const Navbar = () => {
             <div className="navbar-collapse col-lg-7">
 
                 <div className="navbar-nav">
-                {farms_list.map((farm, index)=>{
+               {/*  {farms_list.map((farm, index)=>{
                         const farm_link = `/${farm}`
                         return <NavLink 
                                 key={index}
@@ -77,7 +77,25 @@ export const Navbar = () => {
                             >
                                 {farm.toUpperCase()}
                             </NavLink>
-                    })}
+                    })} */}
+                   {/*  <NavLink 
+                                
+                                activeClassName="active"
+                                className="nav-item nav-link" 
+                                exact
+                                to='/'
+                            >
+                                Noroeste
+                            </NavLink> */}
+                    <NavLink 
+                                
+                                activeClassName="active"
+                                className="nav-item nav-link" 
+                                exact
+                                to='/bienvenida'
+                            >
+                                Bienvenida
+                            </NavLink>
     
                   
                     {/* ------------------------------------------------ */}
@@ -128,10 +146,7 @@ export const Navbar = () => {
         }}
       >
           
-          <MenuItem >
-          {user_detail.nombre} {user_detail.apellidos}
-
-          </MenuItem>
+          
           <MenuItem onClick={ handleVisitas }>
             Mis visitas
           </MenuItem>
